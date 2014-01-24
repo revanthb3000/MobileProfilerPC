@@ -76,6 +76,8 @@ public class FileStorageUtilities {
 			postingList = gson.fromJson(line, PostingList.class);
 			trie.put(key, postingList);
 		}
+		bufferedReader.close();
+		fileReader.close();
 		return trie;
 	}
 

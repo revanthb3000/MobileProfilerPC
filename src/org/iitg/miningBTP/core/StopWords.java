@@ -699,6 +699,7 @@ public class StopWords {
 	 * Removes a Stop Word from the set
 	 * @param word
 	 */
+	@SuppressWarnings("unused")
 	private void removeWordFromSet(String word){
 		stopWords.remove(word);
 	}
