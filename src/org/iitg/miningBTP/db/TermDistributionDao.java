@@ -1,13 +1,24 @@
 package org.iitg.miningBTP.db;
 
+/**
+ * This DAO is used to represent objects that are present in the TermDistribution table.
+ * @author RB
+ *
+ */
 public class TermDistributionDao {
 	
+	/**
+	 * Term we're referring to.
+	 */
 	private String feature;
 	
+	/**
+	 * ClassId that is considered for this object
+	 */
 	private int classId;
 	
 	/**
-	 * Class and feature
+	 * Number of documents that belong to "this.classId" contain the term "this.feature"
 	 */
 	private int A;
 	

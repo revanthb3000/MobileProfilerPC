@@ -7,9 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.Authenticator;
 import java.net.InetSocketAddress;
-import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
@@ -24,29 +22,17 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 /**
- * This class will contain functions that perform actions.
+ * This class contains utility functions and routines that are generally used during classification.
  * @author RB
  *
  */
 public class UtilityFunctions {
 
-	public static void initializeDatabase() throws IOException {
-		System.out.println("Start");
-		DatabaseConnector databaseConnector = new DatabaseConnector();
-		System.out.println("DB Up");
-		databaseConnector.createTables();
-		System.out.println("Tables Created");
-		databaseConnector.fillClassMappings();
-		System.out.println("Mappings Filled");
-		databaseConnector.fillClassContents();
-		System.out.println("Contents Filled");
-		databaseConnector.fillFeaturesList();
-		System.out.println("Features List Filled");
-		databaseConnector.fillTermDistribution();
-		System.out.println("Feature Dist. Done");
-		databaseConnector.closeDBConnection();
-	}
-
+	/**
+	 * This function:
+	 * 1) Deletes the existing features.
+	 * 2) Uses the term distribution data to compute the new features (Gini) and inserts it into the features table.
+	 */
 	public static void recomputeFeatures() {
 		DatabaseConnector databaseConnector = new DatabaseConnector();
 		databaseConnector.deleteFeatures();
@@ -57,6 +43,10 @@ public class UtilityFunctions {
 		databaseConnector.closeDBConnection();
 	}
 	
+	/**
+	 * Basic function that will dump the contents of the features table to a text file.
+	 * @throws IOException
+	 */
 	public static void writeFeaturesToFile() throws IOException{
 		DatabaseConnector databaseConnector = new DatabaseConnector();
 		ArrayList<String> features = databaseConnector.getAllFeaturesList();
@@ -67,11 +57,21 @@ public class UtilityFunctions {
 		fileWriter.close();
 	}
 	
+	
+	/**
+	 * This function takes in a URL and classifies it. Crucial part of the android program too.
+	 * 
+	 * @param webpageUrl WebPage that has to be classified.
+	 * @param shouldMerge Tells the function whether to update the term distribution and class counts after classification.
+	 * @return Returns the className
+	 * @throws IOException
+	 */
 	public static String classifyUrl(String webpageUrl, Boolean shouldMerge) throws IOException {
 		URL url = new URL(webpageUrl);
 		//Use GProxy for this !
 		Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 8080));
 		URLConnection urlConnection = url.openConnection(proxy);
+		//UserAgent is set because of some websites that decide to block bots !
 		urlConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
 		urlConnection.connect();
 		
@@ -102,6 +102,12 @@ public class UtilityFunctions {
 		return className;
 	}
 	
+	/**
+	 * Given a filename as an input, this function reads that file, extracts the text from the source code and returns that String.
+	 * @param fileName Name of the file containing the source code.
+	 * 
+	 * @return Text present on the page
+	 */
 	public static String getSoupedPageContent(String fileName) {
 		String line = "";
 		String sourceCode = "";
@@ -124,6 +130,36 @@ public class UtilityFunctions {
 		return title.text() + " " + body.text();
 	}
 
+	/**
+	 * This function sets up a DB from scratch.
+	 * Creates all the tables.
+	 * Fills it up with content.
+	 * 
+	 * Will probably not be used much. Is a one-time-only function.
+	 * @throws IOException
+	 */
+	public static void initializeDatabase() throws IOException {
+		System.out.println("Start");
+		DatabaseConnector databaseConnector = new DatabaseConnector();
+		System.out.println("DB Up");
+		databaseConnector.createTables();
+		System.out.println("Tables Created");
+		databaseConnector.fillClassMappings();
+		System.out.println("Mappings Filled");
+		databaseConnector.fillClassContents();
+		System.out.println("Contents Filled");
+		databaseConnector.fillFeaturesList();
+		System.out.println("Features List Filled");
+		databaseConnector.fillTermDistribution();
+		System.out.println("Feature Dist. Done");
+		databaseConnector.closeDBConnection();
+	}
+	
+	/**
+	 * Another one-time-only function. This method reads the testing dataset and classifies each document in it. Used to compare initial system's efficiency.
+	 * @throws IOException
+	 * @throws SQLException
+	 */
 	public static void classifyTestingSet() throws IOException, SQLException {
 		int numOfDocsProcessed = 0;
 		TextParser textParser = new TextParser();
