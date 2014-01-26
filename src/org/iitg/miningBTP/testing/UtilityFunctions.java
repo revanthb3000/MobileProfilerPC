@@ -13,6 +13,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.iitg.miningBTP.core.Classifier;
 import org.iitg.miningBTP.core.TextParser;
@@ -22,16 +23,30 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 /**
- * This class contains utility functions and routines that are generally used during classification.
+ * This class contains utility functions and routines that are generally used
+ * during classification.
+ * 
  * @author RB
- *
+ * 
  */
 public class UtilityFunctions {
 
 	/**
-	 * This function:
-	 * 1) Deletes the existing features.
-	 * 2) Uses the term distribution data to compute the new features (Gini) and inserts it into the features table.
+	 * Classifies the entire experimentalOutput.txt file and puts those changes into the DB. Also outputs the features and gini Mapping files.
+	 * @throws IOException
+	 */
+	public static void classifyExperimentalOutput() throws IOException{
+		ArrayList<String> webPages = ExperimentalOutputWorker.parseFile("experimentalOutput.txt");
+		ExperimentalOutputWorker.classifyPages(webPages);
+		recomputeFeatures();
+		writeFeaturesToFile();
+		writeGiniCoeffsToFile();
+	}
+	
+	/**
+	 * This function: 1) Deletes the existing features. 2) Uses the term
+	 * distribution data to compute the new features (Gini) and inserts it into
+	 * the features table.
 	 */
 	public static void recomputeFeatures() {
 		DatabaseConnector databaseConnector = new DatabaseConnector();
@@ -42,42 +57,66 @@ public class UtilityFunctions {
 		databaseConnector.insertFeatures(features);
 		databaseConnector.closeDBConnection();
 	}
-	
+
 	/**
-	 * Basic function that will dump the contents of the features table to a text file.
+	 * Basic function that will dump the contents of the features table to a
+	 * text file.
+	 * 
 	 * @throws IOException
 	 */
-	public static void writeFeaturesToFile() throws IOException{
+	public static void writeFeaturesToFile() throws IOException {
 		DatabaseConnector databaseConnector = new DatabaseConnector();
 		ArrayList<String> features = databaseConnector.getAllFeaturesList();
 		FileWriter fileWriter = new FileWriter("Features.txt");
-		for(String feature : features){
+		for (String feature : features) {
 			fileWriter.write(feature + "\n");
 		}
 		fileWriter.close();
 	}
-	
-	
+
+	public static void writeGiniCoeffsToFile() throws IOException {
+		DatabaseConnector databaseConnector = new DatabaseConnector();
+		Classifier classifier = new Classifier(databaseConnector);
+		Map<String, Double> termGiniMapping = classifier.getGiniMapping();
+		System.out.println("Gini Mapping Loaded");
+		FileWriter fileWriter = new FileWriter("GiniMapping.txt");
+		for (String term : termGiniMapping.keySet()) {
+			fileWriter.write(term + " - " + termGiniMapping.get(term) + "\n");
+		}
+		fileWriter.close();
+		databaseConnector.closeDBConnection();
+	}
+
 	/**
-	 * This function takes in a URL and classifies it. Crucial part of the android program too.
+	 * This function takes in a URL and classifies it. Crucial part of the
+	 * android program too.
 	 * 
-	 * @param webpageUrl WebPage that has to be classified.
-	 * @param shouldMerge Tells the function whether to update the term distribution and class counts after classification.
+	 * @param webpageUrl
+	 *            WebPage that has to be classified.
+	 * @param shouldMerge
+	 *            Tells the function whether to update the term distribution and
+	 *            class counts after classification.
 	 * @return Returns the className
 	 * @throws IOException
 	 */
-	public static String classifyUrl(String webpageUrl, Boolean shouldMerge) throws IOException {
+	public static String classifyUrl(String webpageUrl, Boolean shouldMerge)
+			throws IOException {
 		URL url = new URL(webpageUrl);
-		//Use GProxy for this !
-		Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 8080));
+		// Use GProxy for this !
+		Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(
+				"127.0.0.1", 8080));
 		URLConnection urlConnection = url.openConnection(proxy);
-		//UserAgent is set because of some websites that decide to block bots !
-		urlConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+		// UserAgent is set because of some websites that decide to block bots !
+		urlConnection
+				.setRequestProperty(
+						"User-Agent",
+						"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
 		urlConnection.connect();
-		
+
 		String line = null;
 		StringBuffer webPageBuffer = new StringBuffer();
-		BufferedReader inputReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+		BufferedReader inputReader = new BufferedReader(new InputStreamReader(
+				urlConnection.getInputStream()));
 		while ((line = inputReader.readLine()) != null) {
 			webPageBuffer.append(line);
 		}
@@ -86,25 +125,29 @@ public class UtilityFunctions {
 		Elements title = document.select("title");
 		Elements body = document.select("body");
 		String sourceCode = title.text() + body.text();
-		
-		DatabaseConnector databaseConnector =  new DatabaseConnector();
+
+		DatabaseConnector databaseConnector = new DatabaseConnector();
 		TextParser textParser = new TextParser();
 		Classifier classifier = new Classifier(databaseConnector);
-		int classId = classifier.classifyDoc(textParser.tokenizeString(sourceCode, true));
+		int classId = classifier.classifyDoc(textParser.tokenizeString(
+				sourceCode, true));
 		String className = "";
 		className = databaseConnector.getClassName(classId);
-		if(shouldMerge){
+		if (shouldMerge && (!className.equals(""))) {
 			databaseConnector.updateClassContents(classId);
 			databaseConnector.updateTermDistribution(textParser.getAllTokens(sourceCode, true), classId);
-			System.out.println("Finished updating distribution");	
+			System.out.println("Finished updating distribution");
 		}
 		databaseConnector.closeDBConnection();
 		return className;
 	}
-	
+
 	/**
-	 * Given a filename as an input, this function reads that file, extracts the text from the source code and returns that String.
-	 * @param fileName Name of the file containing the source code.
+	 * Given a filename as an input, this function reads that file, extracts the
+	 * text from the source code and returns that String.
+	 * 
+	 * @param fileName
+	 *            Name of the file containing the source code.
 	 * 
 	 * @return Text present on the page
 	 */
@@ -131,11 +174,11 @@ public class UtilityFunctions {
 	}
 
 	/**
-	 * This function sets up a DB from scratch.
-	 * Creates all the tables.
-	 * Fills it up with content.
+	 * This function sets up a DB from scratch. Creates all the tables. Fills it
+	 * up with content.
 	 * 
 	 * Will probably not be used much. Is a one-time-only function.
+	 * 
 	 * @throws IOException
 	 */
 	public static void initializeDatabase() throws IOException {
@@ -154,9 +197,12 @@ public class UtilityFunctions {
 		System.out.println("Feature Dist. Done");
 		databaseConnector.closeDBConnection();
 	}
-	
+
 	/**
-	 * Another one-time-only function. This method reads the testing dataset and classifies each document in it. Used to compare initial system's efficiency.
+	 * Another one-time-only function. This method reads the testing dataset and
+	 * classifies each document in it. Used to compare initial system's
+	 * efficiency.
+	 * 
 	 * @throws IOException
 	 * @throws SQLException
 	 */

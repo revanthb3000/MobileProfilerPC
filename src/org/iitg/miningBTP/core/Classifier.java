@@ -2,8 +2,11 @@ package org.iitg.miningBTP.core;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.iitg.miningBTP.db.DatabaseConnector;
 import org.iitg.miningBTP.db.TermDistributionDao;
@@ -76,8 +79,7 @@ public class Classifier {
 	}
 
 	public ArrayList<String> getFeaturesList() {
-		ArrayList<String> termsList = databaseConnector
-				.getTermsList();
+		ArrayList<String> termsList = databaseConnector.getTermsList();
 		ArrayList<String> featuresList = new ArrayList<String>();
 		for (String term : termsList) {
 			double giniCoefficient = calculateGiniCoefficient(term);
@@ -86,6 +88,19 @@ public class Classifier {
 			}
 		}
 		return featuresList;
+	}
+
+	public Map<String, Double> getGiniMapping() {
+		ArrayList<String> termsList = databaseConnector.getTermsList();
+		Map<String, Double> termGiniMapping = new HashMap<String, Double>();
+		ValueComparator valueComparator = new ValueComparator(termGiniMapping);
+		TreeMap<String, Double> sortedTermGiniMapping = new TreeMap<String, Double>(valueComparator);
+		for (String term : termsList) {
+			double giniCoefficient = calculateGiniCoefficient(term);
+			termGiniMapping.put(term, giniCoefficient);
+		}
+		sortedTermGiniMapping.putAll(termGiniMapping);
+		return sortedTermGiniMapping;
 	}
 
 	public double calculateGiniCoefficient(String term) {
@@ -100,7 +115,8 @@ public class Classifier {
 			termDistributionDao = termDistributionDaos.get(classId);
 			totalNumberOfOccurences += termDistributionDao.getA();
 		}
-		//If support factor constraint is not satisfied, I'm getting rid of the term.
+		// If support factor constraint is not satisfied, I'm getting rid of the
+		// term.
 		if (totalNumberOfOccurences < SUPPORT_FACTOR) {
 			return 0.0;
 		}
@@ -140,23 +156,17 @@ public class Classifier {
 
 }
 
-/*
- * THIS FUNCTION IS NOW OBSOLETE
- * 
- * public int classifyDocIndividualTerms(ArrayList<String> tokens) { int
- * numOfMatchedFeatures = 0; ArrayList<Double> probabilities = new
- * ArrayList<Double>(); Double temp = 0.0; for (int i = 0; i < numberOfClasses;
- * i++) { temp = (1.0 * classContents.get(i)); probabilities.add(temp); }
- * 
- * ArrayList<TermDistributionDao> termDistributionDaos = null; String
- * previousToken = ""; for (String token : tokens) {
- * if(!(token.equals(previousToken))){ termDistributionDaos =
- * databaseConnector.getAllTermDistribution(token); } numOfMatchedFeatures++;
- * for (int i = 0; i < numberOfClasses; i++) { int termDistA =
- * termDistributionDaos.get(i).getA(); temp = 1000 * ((1.0 * (1 + termDistA)) /
- * (classContents.get(i) + numberOfClasses)); probabilities.set(i,
- * temp*probabilities.get(i)); } } if (numOfMatchedFeatures == 0) { return -1; }
- * int maxIndex = 0; Double maximumValue = -1.0; for (int i = 0; i <
- * numberOfClasses; i++) { if (probabilities.get(i) > maximumValue) {
- * maximumValue = probabilities.get(i); maxIndex = i; } } return maxIndex; }
- */
+class ValueComparator implements Comparator<String> {
+	Map<String, Double> base;
+
+	public ValueComparator(Map<String, Double> base) {
+		this.base = base;
+	}
+
+	/**
+	 * Why do I have a minus sign in there ? It's to get my things in a descending order.
+	 */
+	public int compare(String a, String b) {
+		return -Double.compare(base.get(a), base.get(b));
+	}
+}

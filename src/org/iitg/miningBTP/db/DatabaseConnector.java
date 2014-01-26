@@ -90,7 +90,7 @@ public class DatabaseConnector {
 
 	public void fillClassContents() throws IOException {
 		List<Integer> classContents = FileStorageUtilities
-				.getClassContentInfo("classInfo.dat");
+				.getClassContentInfo("inputSourceFiles/classInfo.dat");
 		String query = "";
 		try {
 			Statement statement = connection.createStatement();
@@ -109,7 +109,7 @@ public class DatabaseConnector {
 
 	public void fillClassMappings() throws IOException {
 		List<String> classMapping = FileStorageUtilities
-				.getClassMappingInfo("classthreshold.txt");
+				.getClassMappingInfo("inputSourceFiles/classthreshold.txt");
 		String query = "";
 		try {
 			Statement statement = connection.createStatement();
@@ -128,7 +128,7 @@ public class DatabaseConnector {
 
 	public void fillTermDistribution() throws IOException {
 		ArrayList<FeatureDistribution> featureDistributions = FileStorageUtilities
-				.getFeatureDistribution("featureDistribution.dat");
+				.getFeatureDistribution("inputSourceFiles/featureDistribution.dat");
 		System.out.println("In here");
 		String query = "";
 		int wordCount = 0;
@@ -164,7 +164,7 @@ public class DatabaseConnector {
 
 	public void fillFeaturesList() throws IOException {
 		ArrayList<String> features = FileStorageUtilities
-				.getFeatures("giniCoefficient0.95.dat");
+				.getFeatures("inputSourceFiles/giniCoefficient0.95.dat");
 		Statement statement = null;
 		String query = "";
 		int wordCount = 0;
