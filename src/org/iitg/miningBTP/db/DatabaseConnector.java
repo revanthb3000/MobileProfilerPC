@@ -60,19 +60,23 @@ public class DatabaseConnector {
 					+ "(`classId` int(11) NOT NULL,`numberOfDocs` "
 					+ "int(11) NOT NULL,PRIMARY KEY (`classId`));";
 			statement.executeUpdate(query);
+			
 			query = "CREATE TABLE IF NOT EXISTS `termdistribution` "
 					+ "(`feature` varchar(255) NOT NULL,`classId` int(11) NOT NULL,"
 					+ "`A` int(11) NOT NULL,"
 					+ "PRIMARY KEY (`feature`,`classId`));";
 			statement.executeUpdate(query);
+			
 			query = "CREATE TABLE IF NOT EXISTS `classmapping` "
 					+ "(`classId` int(11) NOT NULL,`className` "
 					+ "varchar(255) NOT NULL,PRIMARY KEY (`classId`));";
 			statement.executeUpdate(query);
+			
 			query = "CREATE TABLE IF NOT EXISTS "
 					+ "`featurelist` (`feature` varchar(255) "
 					+ "NOT NULL,PRIMARY KEY (`feature`));";
 			statement.executeUpdate(query);
+			
 			// THIS WON'T SUFFICE. OPEN THE SQLITE FILE AND SET activitiesId to
 			// INTEGER PRIMARY KEY
 			query = "CREATE TABLE IF NOT EXISTS `activities` "
@@ -81,6 +85,12 @@ public class DatabaseConnector {
 					+ "`timeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,"
 					+ "`assignedClass` varchar(255) NOT NULL,PRIMARY KEY (`activityId`))";
 			statement.executeUpdate(query);
+			
+			query = "CREATE TABLE IF NOT EXISTS `userdataterms` "
+					+ "(`feature` varchar(255) NOT NULL,`classId` int(11) NOT NULL,"
+					+ "`A` int(11) NOT NULL,"
+					+ "PRIMARY KEY (`feature`,`classId`));";	
+			statement.executeUpdate(query);		
 		} catch (SQLException e) {
 			System.out.println("Exception Caught for query " + query + " \n"
 					+ e);
@@ -586,7 +596,6 @@ public class DatabaseConnector {
 			query += ") and classId=" + classId + ";";
 			try {
 				Statement statement = connection.createStatement();
-				System.out.println(query);
 				statement.executeUpdate(query);
 			} catch (SQLException e) {
 				System.out.println("Exception Caught for query " + query
@@ -695,4 +704,87 @@ public class DatabaseConnector {
 		}
 	}
 
+	/*************************************************************************
+	 *  DB Calls on the temporary table follow:
+	 **************************************************************************/
+	
+	public void updateUserDataTermDistribution(ArrayList<String> tokens, int classId) {
+		ArrayList<String> oldTerms = new ArrayList<String>();
+		ArrayList<String> newTerms = new ArrayList<String>();
+		for (String term : tokens) {
+			if (!isTermPresentInUserDataDistribution(term, classId)) {
+				newTerms.add(term);
+			} else {
+				oldTerms.add(term);
+			}
+		}
+		updateUserDataTermInfo(oldTerms, classId);
+		insertUserDataTermInfo(newTerms, classId);
+	}
+	
+	public Boolean isTermPresentInUserDataDistribution(String term, int classId) {
+		String query = "SELECT * from userdataterms where feature='" + term
+				+ "' and classId = " + classId + ";";
+		Boolean isTermPrsentInDataBase = false;
+		try {
+			Statement statement = connection.createStatement();
+			ResultSet resultSet;
+			resultSet = statement.executeQuery(query);
+			if (resultSet.next()) {
+				isTermPrsentInDataBase = true;
+			}
+		} catch (SQLException e) {
+			System.out.println("Exception Caught for query " + query + " \n"
+					+ e);
+			e.printStackTrace();
+		}
+		return isTermPrsentInDataBase;
+	}
+
+	public void insertUserDataTermInfo(ArrayList<String> newTerms, int classId) {
+		String query = "";
+		try {
+			Statement statement = connection.createStatement();
+			for (int i = 0; i < newTerms.size(); i++) {
+				if (i % 450 == 0) {
+					statement.executeUpdate(query);
+					query = "INSERT INTO `userdataterms` Select '"
+							+ newTerms.get(i) + "' AS `feature`, " + classId
+							+ " AS `classId`, 1 AS `A`";
+				} else {
+					query += "UNION SELECT '" + newTerms.get(i) + "',"
+							+ classId + ",1 ";
+				}
+			}
+			statement.executeUpdate(query);
+		} catch (SQLException e) {
+			System.out.println("Exception Caught for query " + query + " \n"
+					+ e);
+			e.printStackTrace();
+		}
+	}
+
+	public void updateUserDataTermInfo(ArrayList<String> oldTerms, int classId) {
+		int numOfTerms = oldTerms.size();
+		int iterator = 0;
+		while (iterator < numOfTerms) {
+			String query = "Update userdataterms SET `A` = `A` + 1 Where (feature='"
+					+ oldTerms.get(iterator) + "' ";
+			iterator++;
+			while (iterator % 950 != 0 && iterator < numOfTerms) {
+				query += " OR feature='" + oldTerms.get(iterator) + "'";
+				iterator++;
+			}
+			query += ") and classId=" + classId + ";";
+			try {
+				Statement statement = connection.createStatement();
+				statement.executeUpdate(query);
+			} catch (SQLException e) {
+				System.out.println("Exception Caught for query " + query
+						+ " \n" + e);
+				e.printStackTrace();
+			}
+		}
+	}
+	
 }

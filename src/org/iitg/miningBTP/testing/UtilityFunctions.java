@@ -74,6 +74,11 @@ public class UtilityFunctions {
 		fileWriter.close();
 	}
 
+	/**
+	 * This method calculates the Gini coefficients of all terms in the database and pipes the list to a file.
+	 * Terms are sorted in descending order of their Gini coefficients.
+	 * @throws IOException
+	 */
 	public static void writeGiniCoeffsToFile() throws IOException {
 		DatabaseConnector databaseConnector = new DatabaseConnector();
 		Classifier classifier = new Classifier(databaseConnector);
@@ -136,6 +141,7 @@ public class UtilityFunctions {
 		if (shouldMerge && (!className.equals(""))) {
 			databaseConnector.updateClassContents(classId);
 			databaseConnector.updateTermDistribution(textParser.getAllTokens(sourceCode, true), classId);
+			databaseConnector.updateUserDataTermDistribution(textParser.getAllTokens(sourceCode, true), classId);
 			System.out.println("Finished updating distribution");
 		}
 		databaseConnector.closeDBConnection();
