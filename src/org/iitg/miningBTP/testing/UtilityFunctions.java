@@ -107,15 +107,11 @@ public class UtilityFunctions {
 	public static String classifyUrl(String webpageUrl, Boolean shouldMerge)
 			throws IOException {
 		URL url = new URL(webpageUrl);
-		// Use GProxy for this !
-		Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(
-				"127.0.0.1", 8080));
+		//Use GProxy for this !
+		Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 8080));
 		URLConnection urlConnection = url.openConnection(proxy);
 		// UserAgent is set because of some websites that decide to block bots !
-		urlConnection
-				.setRequestProperty(
-						"User-Agent",
-						"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+		urlConnection.setRequestProperty("User-Agent","Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
 		urlConnection.connect();
 
 		String line = null;
@@ -125,7 +121,6 @@ public class UtilityFunctions {
 		while ((line = inputReader.readLine()) != null) {
 			webPageBuffer.append(line);
 		}
-
 		Document document = Jsoup.parse(String.valueOf(webPageBuffer), "UTF-8");
 		Elements title = document.select("title");
 		Elements body = document.select("body");
@@ -134,16 +129,18 @@ public class UtilityFunctions {
 		DatabaseConnector databaseConnector = new DatabaseConnector();
 		TextParser textParser = new TextParser();
 		Classifier classifier = new Classifier(databaseConnector);
-		int classId = classifier.classifyDoc(textParser.tokenizeString(
-				sourceCode, true));
+		
+		int classId = classifier.classifyDoc(textParser.tokenizeString(sourceCode, true));
 		String className = "";
 		className = databaseConnector.getClassName(classId);
+		
 		if (shouldMerge && (!className.equals(""))) {
 			databaseConnector.updateClassContents(classId);
 			databaseConnector.updateTermDistribution(textParser.getAllTokens(sourceCode, true), classId);
 			databaseConnector.updateUserDataTermDistribution(textParser.getAllTokens(sourceCode, true), classId);
 			System.out.println("Finished updating distribution");
 		}
+		
 		databaseConnector.closeDBConnection();
 		return className;
 	}

@@ -12,6 +12,5 @@ public class TestClass {
 
 	public static void main(String[] args) throws IOException{
 		UtilityFunctions.classifyExperimentalOutput();
-		System.out.println("Fin....");
 	}
 }

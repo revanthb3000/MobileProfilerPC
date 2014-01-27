@@ -554,7 +554,7 @@ public class DatabaseConnector {
 	}
 
 	/**
-	 * STill work to do here !!!
+	 * Still work to do here !!!
 	 * 
 	 * @param newTerms
 	 * @param classId
