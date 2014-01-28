@@ -19,7 +19,10 @@ public class DatabaseConnector {
 	private static final String DATABASE_FILE_NAME = "mobileclassifier.db";
 
 	private Connection connection;
-
+	
+	/**
+	 * Basic constructor. Opens a database connection.
+	 */
 	public DatabaseConnector() {
 		openDBConnection();
 	}
@@ -32,6 +35,9 @@ public class DatabaseConnector {
 		return connection;
 	}
 
+	/**
+	 * Tries to open a JDBC connection with the sqlite database.
+	 */
 	public void openDBConnection() {
 		try {
 			Class.forName("org.sqlite.JDBC");
@@ -43,6 +49,9 @@ public class DatabaseConnector {
 		}
 	}
 
+	/**
+	 * Does what it says. Calling this function is crucial. Don't want any open connections lingering around !
+	 */
 	public void closeDBConnection() {
 		try {
 			connection.close();
@@ -52,6 +61,9 @@ public class DatabaseConnector {
 		}
 	}
 
+	/**
+	 * A one time only function. Creates the tables with the required DB schema.
+	 */
 	public void createTables() {
 		String query = "";
 		try {
@@ -98,6 +110,10 @@ public class DatabaseConnector {
 		}
 	}
 
+	/**
+	 * Fill the classContents table with the class distribution of the training dataset.
+	 * @throws IOException
+	 */
 	public void fillClassContents() throws IOException {
 		List<Integer> classContents = FileStorageUtilities
 				.getClassContentInfo("inputSourceFiles/classInfo.dat");
@@ -117,6 +133,10 @@ public class DatabaseConnector {
 		}
 	}
 
+	/**
+	 * Fills the mapping tables with values from 1 to 237 along with the respective class names.
+	 * @throws IOException
+	 */
 	public void fillClassMappings() throws IOException {
 		List<String> classMapping = FileStorageUtilities
 				.getClassMappingInfo("inputSourceFiles/classthreshold.txt");
@@ -136,6 +156,10 @@ public class DatabaseConnector {
 		}
 	}
 
+	/**
+	 * Takes the training dataset index table and fills this table using that data.
+	 * @throws IOException
+	 */
 	public void fillTermDistribution() throws IOException {
 		ArrayList<FeatureDistribution> featureDistributions = FileStorageUtilities
 				.getFeatureDistribution("inputSourceFiles/featureDistribution.dat");
@@ -172,6 +196,10 @@ public class DatabaseConnector {
 		}
 	}
 
+	/**
+	 * Initial set of features with gini = 0.95
+	 * @throws IOException
+	 */
 	public void fillFeaturesList() throws IOException {
 		ArrayList<String> features = FileStorageUtilities
 				.getFeatures("inputSourceFiles/giniCoefficient0.95.dat");
@@ -197,6 +225,12 @@ public class DatabaseConnector {
 		}
 	}
 
+	/**
+	 * Given a word and classId, this function will return a TermDistributionDao object which will also contain the 'A' value.
+	 * @param term
+	 * @param classId
+	 * @return
+	 */
 	public TermDistributionDao getTermDistribution(String term, int classId) {
 		String query = "SELECT * from termdistribution where feature='" + term
 				+ "' AND classId=" + classId + ";";
@@ -218,6 +252,11 @@ public class DatabaseConnector {
 		return termDistributionDao;
 	}
 
+	/**
+	 * Given a term, this function will return a Map between classId and termDistributionDao objects. Useful function if you need the distribution of a term across all classes.
+	 * @param term
+	 * @return
+	 */
 	public Map<Integer, TermDistributionDao> getAllTermDistribution(String term) {
 		String query = "SELECT * from termdistribution where feature='" + term
 				+ "';";
@@ -242,6 +281,11 @@ public class DatabaseConnector {
 		return termDistributionDaos;
 	}
 
+	/**
+	 * Similar to the previous function. Given a set of tokens, a Map is returned that will contain info of the termDistribution of each term present in the ArrayList.
+	 * @param tokens
+	 * @return
+	 */
 	public Map<String, Map<Integer, TermDistributionDao>> getAllTokensDistribution(
 			ArrayList<String> tokens) {
 		if (tokens.size() == 0) {
@@ -290,6 +334,11 @@ public class DatabaseConnector {
 		return termDistributionMap;
 	}
 
+	/**
+	 * Given a set of words, this function returns all those terms that are a part of our feature set.
+	 * @param tokens
+	 * @return
+	 */
 	public ArrayList<String> getTokensList(ArrayList<String> tokens) {
 		if (tokens.size() == 0) {
 			return null;
@@ -322,6 +371,10 @@ public class DatabaseConnector {
 		return features;
 	}
 
+	/**
+	 * Returns a list of all the features used by the classifier.
+	 * @return
+	 */
 	public ArrayList<String> getAllFeaturesList() {
 		String query = "SELECT * from featurelist;";
 		ArrayList<String> features = new ArrayList<String>();
@@ -341,6 +394,11 @@ public class DatabaseConnector {
 		return features;
 	}
 
+	/**
+	 * Tells if a given term is a feature or not.
+	 * @param term
+	 * @return
+	 */
 	public Boolean isTermFeature(String term) {
 		String query = "SELECT * from featurelist where feature='" + term
 				+ "';";
@@ -360,6 +418,10 @@ public class DatabaseConnector {
 		return isTermFeature;
 	}
 
+	/**
+	 * Queries the database and gets the total number of classes used.
+	 * @return
+	 */
 	public int getNumberOfClasses() {
 		String query = "SELECT Count(className) from classmapping;";
 		int numberOfClasses = 0;
@@ -378,6 +440,10 @@ public class DatabaseConnector {
 		return numberOfClasses;
 	}
 
+	/**
+	 * Queries the database and gets the total number of documents that have been classified till now.
+	 * @return
+	 */
 	public int getTotalNumberOfDocuments() {
 		String query = "SELECT SUM(numberOfDocs) from classcontents;";
 		int totalNumberOfDocs = 0;
@@ -396,6 +462,12 @@ public class DatabaseConnector {
 		return totalNumberOfDocs;
 	}
 
+	/**
+	 * Returns the number of docs. that belong the classIds between two numbers.
+	 * @param startingClassId
+	 * @param endingClassId
+	 * @return
+	 */
 	public ArrayList<Integer> getNumberOfDocuments(int startingClassId,
 			int endingClassId) {
 		String query = "SELECT numberOfDocs from classcontents where classId>="
@@ -416,6 +488,11 @@ public class DatabaseConnector {
 		return classContents;
 	}
 
+	/**
+	 * Given a classId, this function returns the name of the class.
+	 * @param classId
+	 * @return
+	 */
 	public String getClassName(int classId) {
 		String query = "SELECT className from classmapping where classId="
 				+ classId + ";";
@@ -435,6 +512,10 @@ public class DatabaseConnector {
 		return className;
 	}
 
+	/**
+	 * Returns the list of all terms present in the database.
+	 * @return
+	 */
 	public ArrayList<String> getTermsList() {
 		String query = "SELECT distinct(feature) from termdistribution;";
 		ArrayList<String> termsList = new ArrayList<String>();
@@ -453,6 +534,9 @@ public class DatabaseConnector {
 		return termsList;
 	}
 
+	/**
+	 * Clears the features table and removes all entries.
+	 */
 	public void deleteFeatures() {
 		String query = "Delete from featurelist";
 		try {
@@ -465,6 +549,10 @@ public class DatabaseConnector {
 		}
 	}
 
+	/**
+	 * Deletes all those entries where A=0. Those are useless and redundant.
+	 * NOTE: Thus function is obsolete.
+	 */
 	public void deleteEmptyDistributions() {
 		String query = "Delete from termdistribution where A=0;";
 		try {
@@ -507,6 +595,12 @@ public class DatabaseConnector {
 		}
 	}
 
+	/**
+	 * Given a term and classId, this functions tells you if there's a <term,classId,A> mapping
+	 * @param term
+	 * @param classId
+	 * @return
+	 */
 	public Boolean isTermPresentInClassDistribution(String term, int classId) {
 		String query = "SELECT * from termdistribution where feature='" + term
 				+ "' and classId = " + classId + ";";
@@ -526,6 +620,10 @@ public class DatabaseConnector {
 		return isTermPrsentInDataBase;
 	}
 
+	/**
+	 * Given a classId, the class contents for that classId are incremented.
+	 * @param classId
+	 */
 	public void updateClassContents(int classId) {
 		String query = "Update `classcontents` SET numberOfDocs = numberOfDocs + 1 Where classId="
 				+ classId + ";";
@@ -539,6 +637,11 @@ public class DatabaseConnector {
 		}
 	}
 
+	/**
+	 * Given a set of terms, the termDistribution table is updated. Old terms are updated and new terms are added.
+	 * @param tokens
+	 * @param classId
+	 */
 	public void updateTermDistribution(ArrayList<String> tokens, int classId) {
 		ArrayList<String> oldTerms = new ArrayList<String>();
 		ArrayList<String> newTerms = new ArrayList<String>();
@@ -554,7 +657,7 @@ public class DatabaseConnector {
 	}
 
 	/**
-	 * Still work to do here !!!
+	 * Given a couple of terms and a classId, this function adds the <term,classId,A> mapping
 	 * 
 	 * @param newTerms
 	 * @param classId
@@ -582,6 +685,11 @@ public class DatabaseConnector {
 		}
 	}
 
+	/**
+	 * Increments the count of <term,classId,A> mappings.
+	 * @param oldTerms
+	 * @param classId
+	 */
 	public void updateTermInfo(ArrayList<String> oldTerms, int classId) {
 		int numOfTerms = oldTerms.size();
 		int iterator = 0;
@@ -605,6 +713,10 @@ public class DatabaseConnector {
 		}
 	}
 
+	/**
+	 * Basic function that inserts an activityDao into the Database.
+	 * @param activityDaos
+	 */
 	public void insertActivityIntoDB(ArrayList<ActivityDao> activityDaos) {
 		String query = "";
 		try {
@@ -637,6 +749,10 @@ public class DatabaseConnector {
 		}
 	}
 
+	/**
+	 * This function tells you the timeStamp of the last performed activity. Useful while inserting activities to the table. You don't insert something with a higher timestamp than this.
+	 * @return
+	 */
 	public String getMaxActivityTimeStamp() {
 		String query = "SELECT MAX(timeStamp) from activities;";
 		String maxTimeStamp = "";
@@ -658,6 +774,10 @@ public class DatabaseConnector {
 		return maxTimeStamp;
 	}
 
+	/**
+	 * Gets an ArrayList of activityDaos which have not been assigned a class yet.
+	 * @return
+	 */
 	public ArrayList<ActivityDao> getUnclassifiedActivities() {
 		String query = "SELECT `activityId`, `activityType`, `activityInfo`, `timeStamp`, `assignedClass` from activities where assignedClass='Not Assigned'";
 		ArrayList<ActivityDao> activityDaos = new ArrayList<ActivityDao>();
@@ -683,6 +803,10 @@ public class DatabaseConnector {
 		return activityDaos;
 	}
 
+	/**
+	 * Updates the className field of the activities table.
+	 * @param activityDaos
+	 */
 	public void updateActivities(ArrayList<ActivityDao> activityDaos) {
 		String query = "UPDATE `activities` SET `assignedClass` = CASE activityId ";
 		String queryPartTwo = "";
@@ -708,6 +832,10 @@ public class DatabaseConnector {
 	 * DB Calls on the temporary table follow:
 	 **************************************************************************/
 
+	/**
+	 * Gets a list of terms that have been encountered in the user's activities.
+	 * @return
+	 */
 	public ArrayList<String> getTermsInUserData() {
 		String query = "SELECT distinct(feature) from userdataterms;";
 		ArrayList<String> userTerms = new ArrayList<String>();
@@ -726,6 +854,11 @@ public class DatabaseConnector {
 		return userTerms;
 	}
 
+	/**
+	 * Similar to updating the termDistribution table. Different table, same story.
+	 * @param tokens
+	 * @param classId
+	 */
 	public void updateUserDataTermDistribution(ArrayList<String> tokens,
 			int classId) {
 		ArrayList<String> oldTerms = new ArrayList<String>();
@@ -741,6 +874,12 @@ public class DatabaseConnector {
 		insertUserDataTermInfo(newTerms, classId);
 	}
 
+	/**
+	 * Checks if a term has been encountered in the user's profiled data.
+	 * @param term
+	 * @param classId
+	 * @return
+	 */
 	public Boolean isTermPresentInUserDataDistribution(String term, int classId) {
 		String query = "SELECT * from userdataterms where feature='" + term
 				+ "' and classId = " + classId + ";";
@@ -760,6 +899,11 @@ public class DatabaseConnector {
 		return isTermPrsentInDataBase;
 	}
 
+	/**
+	 * Adds new entries to the userDataTerms table.
+	 * @param newTerms
+	 * @param classId
+	 */
 	public void insertUserDataTermInfo(ArrayList<String> newTerms, int classId) {
 		String query = "";
 		try {
@@ -783,6 +927,11 @@ public class DatabaseConnector {
 		}
 	}
 
+	/**
+	 * Updates existing entries in the userDataTerms table.
+	 * @param oldTerms
+	 * @param classId
+	 */
 	public void updateUserDataTermInfo(ArrayList<String> oldTerms, int classId) {
 		int numOfTerms = oldTerms.size();
 		int iterator = 0;
