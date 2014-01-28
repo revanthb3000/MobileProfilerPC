@@ -14,10 +14,16 @@ import org.iitg.miningBTP.db.DatabaseConnector;
 public class TestClass {
 
 	public static void main(String[] args) throws IOException{
+		calculateExperimentalFeatures();
+		//UtilityFunctions.recomputeFeatures();
+	}
+	
+	public static void calculateExperimentalFeatures() throws IOException{
 		DatabaseConnector databaseConnector = new DatabaseConnector();
 		ArrayList<String> userDataTerms = databaseConnector.getTermsInUserData();
 		databaseConnector.closeDBConnection();
 		UtilityFunctions.recomputeSelectFeatures(userDataTerms);
-		UtilityFunctions.writeFeaturesToFile();
+		UtilityFunctions.writeFeaturesToFile();		
 	}
+	
 }

@@ -84,6 +84,27 @@ public class UtilityFunctions {
 	}
 
 	/**
+	 * When I'm given a filename, I'll read the features from it, store it in an ArrayList and dump this stuff into the database.
+	 * @param fileName
+	 * @throws IOException 
+	 */
+	public static void insertFeaturesFromFile(String fileName) throws IOException{
+		ArrayList<String> featuresList = new ArrayList<String>();
+		String line = "";
+		FileReader fileReader = new FileReader(fileName);
+		BufferedReader bufferedReader = new BufferedReader(fileReader);
+		while((line=bufferedReader.readLine())!=null){
+			featuresList.add(line.trim());
+		}
+		bufferedReader.close();
+		fileReader.close();
+		DatabaseConnector databaseConnector = new DatabaseConnector();
+		databaseConnector.deleteFeatures();
+		databaseConnector.insertFeatures(featuresList);
+		databaseConnector.closeDBConnection();
+	}
+	
+	/**
 	 * Basic function that will dump the contents of the features table to a
 	 * text file.
 	 * 

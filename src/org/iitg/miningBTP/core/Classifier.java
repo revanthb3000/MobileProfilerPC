@@ -23,7 +23,7 @@ public class Classifier {
 
 	private final int SUPPORT_FACTOR = 20;
 	
-	private final double GINI_THRESHOLD = 0.85;
+	private final double GINI_THRESHOLD = 0.95;
 
 	public Classifier(DatabaseConnector inputDatabaseConnector) {
 		this.databaseConnector = inputDatabaseConnector;
