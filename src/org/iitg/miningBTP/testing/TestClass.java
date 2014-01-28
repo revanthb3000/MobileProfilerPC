@@ -1,6 +1,9 @@
 package org.iitg.miningBTP.testing;
 
 import java.io.IOException;
+import java.util.ArrayList;
+
+import org.iitg.miningBTP.db.DatabaseConnector;
 
 
 /**
@@ -11,6 +14,10 @@ import java.io.IOException;
 public class TestClass {
 
 	public static void main(String[] args) throws IOException{
-		UtilityFunctions.classifyExperimentalOutput();
+		DatabaseConnector databaseConnector = new DatabaseConnector();
+		ArrayList<String> userDataTerms = databaseConnector.getTermsInUserData();
+		databaseConnector.closeDBConnection();
+		UtilityFunctions.recomputeSelectFeatures(userDataTerms);
+		UtilityFunctions.writeFeaturesToFile();
 	}
 }

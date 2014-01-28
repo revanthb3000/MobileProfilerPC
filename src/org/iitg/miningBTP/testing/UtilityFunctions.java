@@ -57,6 +57,31 @@ public class UtilityFunctions {
 		databaseConnector.insertFeatures(features);
 		databaseConnector.closeDBConnection();
 	}
+	
+	/**
+	 * How is this different from the previous function ? I'm only using a set of potential features to make my decision. 
+	 * Calculate Gini of only these features and then do the work.
+	 */
+	public static void recomputeSelectFeatures(ArrayList<String> potentialFeatures){
+		DatabaseConnector databaseConnector = new DatabaseConnector();
+		Classifier classifier = new Classifier(databaseConnector);
+		ArrayList<String> featuresList = databaseConnector.getAllFeaturesList();
+		for(String potentialFeature : potentialFeatures){
+			double giniCoefficient = classifier.calculateGiniCoefficient(potentialFeature);
+			if(featuresList.contains(potentialFeature)){
+				if(giniCoefficient<classifier.getGiniThreshold()){
+					featuresList.remove(potentialFeature);
+				}
+			}
+			else{
+				if(giniCoefficient>=classifier.getGiniThreshold()){
+					featuresList.add(potentialFeature);
+				}
+			}
+		}
+		databaseConnector.deleteFeatures();
+		databaseConnector.insertFeatures(featuresList);
+	}
 
 	/**
 	 * Basic function that will dump the contents of the features table to a

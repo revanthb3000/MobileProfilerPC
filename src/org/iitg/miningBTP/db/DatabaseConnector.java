@@ -60,23 +60,23 @@ public class DatabaseConnector {
 					+ "(`classId` int(11) NOT NULL,`numberOfDocs` "
 					+ "int(11) NOT NULL,PRIMARY KEY (`classId`));";
 			statement.executeUpdate(query);
-			
+
 			query = "CREATE TABLE IF NOT EXISTS `termdistribution` "
 					+ "(`feature` varchar(255) NOT NULL,`classId` int(11) NOT NULL,"
 					+ "`A` int(11) NOT NULL,"
 					+ "PRIMARY KEY (`feature`,`classId`));";
 			statement.executeUpdate(query);
-			
+
 			query = "CREATE TABLE IF NOT EXISTS `classmapping` "
 					+ "(`classId` int(11) NOT NULL,`className` "
 					+ "varchar(255) NOT NULL,PRIMARY KEY (`classId`));";
 			statement.executeUpdate(query);
-			
+
 			query = "CREATE TABLE IF NOT EXISTS "
 					+ "`featurelist` (`feature` varchar(255) "
 					+ "NOT NULL,PRIMARY KEY (`feature`));";
 			statement.executeUpdate(query);
-			
+
 			// THIS WON'T SUFFICE. OPEN THE SQLITE FILE AND SET activitiesId to
 			// INTEGER PRIMARY KEY
 			query = "CREATE TABLE IF NOT EXISTS `activities` "
@@ -85,12 +85,12 @@ public class DatabaseConnector {
 					+ "`timeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,"
 					+ "`assignedClass` varchar(255) NOT NULL,PRIMARY KEY (`activityId`))";
 			statement.executeUpdate(query);
-			
+
 			query = "CREATE TABLE IF NOT EXISTS `userdataterms` "
 					+ "(`feature` varchar(255) NOT NULL,`classId` int(11) NOT NULL,"
 					+ "`A` int(11) NOT NULL,"
-					+ "PRIMARY KEY (`feature`,`classId`));";	
-			statement.executeUpdate(query);		
+					+ "PRIMARY KEY (`feature`,`classId`));";
+			statement.executeUpdate(query);
 		} catch (SQLException e) {
 			System.out.println("Exception Caught for query " + query + " \n"
 					+ e);
@@ -321,7 +321,7 @@ public class DatabaseConnector {
 		}
 		return features;
 	}
-	
+
 	public ArrayList<String> getAllFeaturesList() {
 		String query = "SELECT * from featurelist;";
 		ArrayList<String> features = new ArrayList<String>();
@@ -705,10 +705,29 @@ public class DatabaseConnector {
 	}
 
 	/*************************************************************************
-	 *  DB Calls on the temporary table follow:
+	 * DB Calls on the temporary table follow:
 	 **************************************************************************/
-	
-	public void updateUserDataTermDistribution(ArrayList<String> tokens, int classId) {
+
+	public ArrayList<String> getTermsInUserData() {
+		String query = "SELECT distinct(feature) from userdataterms;";
+		ArrayList<String> userTerms = new ArrayList<String>();
+		try {
+			Statement statement = connection.createStatement();
+			ResultSet resultSet;
+			resultSet = statement.executeQuery(query);
+			while (resultSet.next()) {
+				userTerms.add(resultSet.getString("feature"));
+			}
+		} catch (SQLException e) {
+			System.out.println("Exception Caught for query " + query + " \n"
+					+ e);
+			e.printStackTrace();
+		}
+		return userTerms;
+	}
+
+	public void updateUserDataTermDistribution(ArrayList<String> tokens,
+			int classId) {
 		ArrayList<String> oldTerms = new ArrayList<String>();
 		ArrayList<String> newTerms = new ArrayList<String>();
 		for (String term : tokens) {
@@ -721,7 +740,7 @@ public class DatabaseConnector {
 		updateUserDataTermInfo(oldTerms, classId);
 		insertUserDataTermInfo(newTerms, classId);
 	}
-	
+
 	public Boolean isTermPresentInUserDataDistribution(String term, int classId) {
 		String query = "SELECT * from userdataterms where feature='" + term
 				+ "' and classId = " + classId + ";";
@@ -786,5 +805,5 @@ public class DatabaseConnector {
 			}
 		}
 	}
-	
+
 }

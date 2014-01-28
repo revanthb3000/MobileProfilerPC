@@ -22,6 +22,8 @@ public class Classifier {
 	private DatabaseConnector databaseConnector;
 
 	private final int SUPPORT_FACTOR = 20;
+	
+	private final double GINI_THRESHOLD = 0.85;
 
 	public Classifier(DatabaseConnector inputDatabaseConnector) {
 		this.databaseConnector = inputDatabaseConnector;
@@ -30,6 +32,14 @@ public class Classifier {
 		this.numberOfClasses = this.databaseConnector.getNumberOfClasses();
 		this.classContents = this.databaseConnector.getNumberOfDocuments(0,
 				this.totalNumberOfDocs);
+	}
+	
+	public int getSupportFactor() {
+		return SUPPORT_FACTOR;
+	}
+	
+	public double getGiniThreshold() {
+		return GINI_THRESHOLD;
 	}
 
 	public void closeDBConnection() {
@@ -83,7 +93,7 @@ public class Classifier {
 		ArrayList<String> featuresList = new ArrayList<String>();
 		for (String term : termsList) {
 			double giniCoefficient = calculateGiniCoefficient(term);
-			if (giniCoefficient >= 0.95) {
+			if (giniCoefficient >= GINI_THRESHOLD) {
 				featuresList.add(term);
 			}
 		}
