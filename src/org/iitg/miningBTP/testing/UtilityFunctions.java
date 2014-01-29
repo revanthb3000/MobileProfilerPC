@@ -37,7 +37,7 @@ public class UtilityFunctions {
 	 */
 	public static void classifyExperimentalOutput() throws IOException{
 		ArrayList<String> webPages = ExperimentalOutputWorker.parseFile("experimentalOutput.txt");
-		ExperimentalOutputWorker.classifyPages(webPages);
+		ExperimentalOutputWorker.classifyPages(webPages,true);
 		recomputeFeatures();
 		writeFeaturesToFile();
 		writeGiniCoeffsToFile();
@@ -53,9 +53,34 @@ public class UtilityFunctions {
 		databaseConnector.deleteFeatures();
 		System.out.println("Features Gone");
 		Classifier classifier = new Classifier(databaseConnector);
-		ArrayList<String> features = classifier.getFeaturesList();
+		ArrayList<String> features = classifier.calculateFeaturesList();
 		databaseConnector.insertFeatures(features);
 		databaseConnector.closeDBConnection();
+	}
+
+	/**
+	 * This function recomputes the features list and gives out the symmetric difference.
+	 * @return Symmetric difference of oldFeatures and newFeatures along with a tag to indicate if a feature has been added or removed.
+	 */
+	public static ArrayList<String> getChangeInFeatures(){
+		DatabaseConnector databaseConnector = new DatabaseConnector();
+		Classifier classifier = new Classifier(databaseConnector);
+		
+		ArrayList<String> originalFeatures = databaseConnector.getAllFeaturesList();
+		ArrayList<String> newFeatures = classifier.calculateFeaturesList();
+		ArrayList<String> difference = new ArrayList<String>();
+		for(String feature : originalFeatures){
+			if(!newFeatures.contains(feature)){
+				difference.add(feature + "   -----removed");
+			}
+		}
+		for(String feature : newFeatures){
+			if(!originalFeatures.contains(feature)){
+				difference.add(feature + "   -----added");
+			}
+		}
+		databaseConnector.closeDBConnection();
+		return difference;
 	}
 	
 	/**
@@ -152,6 +177,36 @@ public class UtilityFunctions {
 	 */
 	public static String classifyUrl(String webpageUrl, Boolean shouldMerge)
 			throws IOException {
+		String sourceCode = getPageSourceCode(webpageUrl);
+
+		DatabaseConnector databaseConnector = new DatabaseConnector();
+		TextParser textParser = new TextParser();
+		Classifier classifier = new Classifier(databaseConnector);
+		
+		int classId = classifier.classifyDoc(textParser.tokenizeString(sourceCode, true));
+		String className = "";
+		className = databaseConnector.getClassName(classId);
+		
+		System.out.println("Number of terms is : " + textParser.getAllTokens(sourceCode, true).size());
+		
+		if (shouldMerge && (!className.equals(""))) {
+			databaseConnector.updateClassContents(classId);
+			databaseConnector.updateTermDistribution(textParser.getAllTokens(sourceCode, true), classId);
+			databaseConnector.updateUserDataTermDistribution(textParser.getAllTokens(sourceCode, true), classId);
+			System.out.println("Finished updating distribution");
+		}
+		
+		databaseConnector.closeDBConnection();
+		return className;
+	}
+	
+	/**
+	 * This function visits a webpage, gets the source code, removes the html tags and gives you text to work with.
+	 * @param webpageUrl
+	 * @return
+	 * @throws IOException
+	 */
+	public static String getPageSourceCode(String webpageUrl) throws IOException{
 		URL url = new URL(webpageUrl);
 		//Use GProxy for this !
 		Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 8080));
@@ -170,25 +225,7 @@ public class UtilityFunctions {
 		Document document = Jsoup.parse(String.valueOf(webPageBuffer), "UTF-8");
 		Elements title = document.select("title");
 		Elements body = document.select("body");
-		String sourceCode = title.text() + body.text();
-
-		DatabaseConnector databaseConnector = new DatabaseConnector();
-		TextParser textParser = new TextParser();
-		Classifier classifier = new Classifier(databaseConnector);
-		
-		int classId = classifier.classifyDoc(textParser.tokenizeString(sourceCode, true));
-		String className = "";
-		className = databaseConnector.getClassName(classId);
-		
-		if (shouldMerge && (!className.equals(""))) {
-			databaseConnector.updateClassContents(classId);
-			databaseConnector.updateTermDistribution(textParser.getAllTokens(sourceCode, true), classId);
-			databaseConnector.updateUserDataTermDistribution(textParser.getAllTokens(sourceCode, true), classId);
-			System.out.println("Finished updating distribution");
-		}
-		
-		databaseConnector.closeDBConnection();
-		return className;
+		return title.text() + " " + body.text(); 
 	}
 
 	/**

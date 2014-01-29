@@ -85,10 +85,10 @@ public class Classifier {
 
 	public void recomputeFeatures() {
 		databaseConnector.deleteFeatures();
-		databaseConnector.insertFeatures(getFeaturesList());
+		databaseConnector.insertFeatures(calculateFeaturesList());
 	}
 
-	public ArrayList<String> getFeaturesList() {
+	public ArrayList<String> calculateFeaturesList() {
 		ArrayList<String> termsList = databaseConnector.getTermsList();
 		ArrayList<String> featuresList = new ArrayList<String>();
 		for (String term : termsList) {

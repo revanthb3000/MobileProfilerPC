@@ -42,11 +42,11 @@ public class ExperimentalOutputWorker {
 	 * @param webPages ArrayList of URLs
 	 * @throws IOException
 	 */
-	public static void classifyPages(ArrayList<String> webPages) throws IOException{
+	public static void classifyPages(ArrayList<String> webPages, Boolean shouldMerge) throws IOException{
 		int totalCount = 0;
 		int classifiedCount = 0;
 		for(String webPage : webPages){
-			String className = UtilityFunctions.classifyUrl(webPage, true);
+			String className = UtilityFunctions.classifyUrl(webPage, shouldMerge);
 			totalCount++;
 			if(!className.trim().equals("")){
 				System.out.println("URL is : " + webPage);
