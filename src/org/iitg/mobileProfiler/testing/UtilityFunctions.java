@@ -192,7 +192,12 @@ public class UtilityFunctions {
 		if (shouldMerge && (!className.equals(""))) {
 			databaseConnector.updateClassContents(classId);
 			databaseConnector.updateTermDistribution(textParser.getAllTokens(sourceCode, true), classId);
+			
+			/* This is to be called only if you wish to update the userData TermDistribution table.
+			
 			databaseConnector.updateUserDataTermDistribution(textParser.getAllTokens(sourceCode, true), classId);
+			
+			*/
 			System.out.println("Finished updating distribution");
 		}
 		

@@ -14,6 +14,12 @@ import java.util.Map;
 import org.iitg.mobileProfiler.core.FeatureDistribution;
 import org.iitg.mobileProfiler.dal.FileStorageUtilities;
 
+/**
+ * This is the main class used to interact with the database.
+ * A class with several methods in it. Contains methods for all database queries that will be used.
+ * @author RB
+ *
+ */
 public class DatabaseConnector {
 
 	private static final String DATABASE_FILE_NAME = "mobileclassifier.db";
