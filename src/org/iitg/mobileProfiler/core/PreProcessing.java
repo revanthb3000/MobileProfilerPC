@@ -1,4 +1,4 @@
-package org.iitg.miningBTP.core;
+package org.iitg.mobileProfiler.core;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.ardverk.collection.Trie;
-import org.iitg.miningBTP.dal.FileStorageUtilities;
-import org.iitg.miningBTP.dal.PostingList;
+import org.iitg.mobileProfiler.dal.FileStorageUtilities;
+import org.iitg.mobileProfiler.dal.PostingList;
 
 public class PreProcessing {
 	

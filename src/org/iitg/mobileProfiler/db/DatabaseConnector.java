@@ -1,4 +1,4 @@
-package org.iitg.miningBTP.db;
+package org.iitg.mobileProfiler.db;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.iitg.miningBTP.core.FeatureDistribution;
-import org.iitg.miningBTP.dal.FileStorageUtilities;
+import org.iitg.mobileProfiler.core.FeatureDistribution;
+import org.iitg.mobileProfiler.dal.FileStorageUtilities;
 
 public class DatabaseConnector {
 

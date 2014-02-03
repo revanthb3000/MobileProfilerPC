@@ -1,4 +1,4 @@
-package org.iitg.miningBTP.testing;
+package org.iitg.mobileProfiler.testing;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -7,8 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.iitg.miningBTP.core.TextParser;
-import org.iitg.miningBTP.db.DatabaseConnector;
+import org.iitg.mobileProfiler.core.TextParser;
+import org.iitg.mobileProfiler.db.DatabaseConnector;
 
 
 /**
@@ -19,7 +19,9 @@ import org.iitg.miningBTP.db.DatabaseConnector;
 public class TestClass {
 
 	public static void main(String[] args) throws IOException{
-		potentialFeaturesVerification();
+		String className = UtilityFunctions.classifyUrl("https://github.com/revanthb3000", false);
+		System.out.println(className);
+		//potentialFeaturesVerification();
 	}
 	
 	public static void potentialFeaturesVerification() throws IOException{

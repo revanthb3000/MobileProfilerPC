@@ -1,4 +1,4 @@
-package org.iitg.miningBTP.dal;
+package org.iitg.mobileProfiler.dal;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -13,7 +13,7 @@ import java.util.Map.Entry;
 import org.ardverk.collection.PatriciaTrie;
 import org.ardverk.collection.StringKeyAnalyzer;
 import org.ardverk.collection.Trie;
-import org.iitg.miningBTP.core.FeatureDistribution;
+import org.iitg.mobileProfiler.core.FeatureDistribution;
 
 import com.google.gson.Gson;
 

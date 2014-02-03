@@ -1,4 +1,4 @@
-package org.iitg.miningBTP.db;
+package org.iitg.mobileProfiler.db;
 
 /**
  * This DAO is used to represent objects that are present in the TermDistribution table.

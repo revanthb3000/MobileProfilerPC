@@ -1,4 +1,4 @@
-package org.iitg.miningBTP.dal;
+package org.iitg.mobileProfiler.dal;
 
 import java.util.HashMap;
 import java.util.Map;

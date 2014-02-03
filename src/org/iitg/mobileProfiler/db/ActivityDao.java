@@ -1,4 +1,4 @@
-package org.iitg.miningBTP.db;
+package org.iitg.mobileProfiler.db;
 
 public class ActivityDao {
 	

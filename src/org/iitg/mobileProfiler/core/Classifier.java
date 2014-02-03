@@ -1,4 +1,4 @@
-package org.iitg.miningBTP.core;
+package org.iitg.mobileProfiler.core;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.iitg.miningBTP.db.DatabaseConnector;
-import org.iitg.miningBTP.db.TermDistributionDao;
+import org.iitg.mobileProfiler.db.DatabaseConnector;
+import org.iitg.mobileProfiler.db.TermDistributionDao;
 
 public class Classifier {
 

@@ -1,4 +1,4 @@
-package org.iitg.miningBTP.core;
+package org.iitg.mobileProfiler.core;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.iitg.miningBTP.dal.PostingList;
+import org.iitg.mobileProfiler.dal.PostingList;
 
 public class FeatureDistribution {
 

@@ -1,4 +1,4 @@
-package org.iitg.miningBTP.dal;
+package org.iitg.mobileProfiler.dal;
 
 public class DocDao {
 	

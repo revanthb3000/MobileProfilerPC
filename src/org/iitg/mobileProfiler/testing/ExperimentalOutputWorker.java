@@ -1,4 +1,4 @@
-package org.iitg.miningBTP.testing;
+package org.iitg.mobileProfiler.testing;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

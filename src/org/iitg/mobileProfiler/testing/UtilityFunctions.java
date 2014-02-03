@@ -1,4 +1,4 @@
-package org.iitg.miningBTP.testing;
+package org.iitg.mobileProfiler.testing;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -15,9 +15,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.iitg.miningBTP.core.Classifier;
-import org.iitg.miningBTP.core.TextParser;
-import org.iitg.miningBTP.db.DatabaseConnector;
+import org.iitg.mobileProfiler.core.Classifier;
+import org.iitg.mobileProfiler.core.TextParser;
+import org.iitg.mobileProfiler.db.DatabaseConnector;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;

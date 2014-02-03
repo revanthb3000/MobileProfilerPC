@@ -1,4 +1,4 @@
-package org.iitg.miningBTP.core;
+package org.iitg.mobileProfiler.core;
 
 import java.util.HashSet;
 
