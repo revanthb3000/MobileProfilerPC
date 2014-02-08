@@ -61,7 +61,7 @@ public class PotentialFeatureAnalysis {
 	
 	public static void calculateExperimentalFeatures() throws IOException{
 		DatabaseConnector databaseConnector = new DatabaseConnector();
-		ArrayList<String> userDataTerms = databaseConnector.getTermsInUserData();
+		ArrayList<String> userDataTerms = databaseConnector.getTermsList(true);
 		databaseConnector.closeDBConnection();
 		UtilityFunctions.recomputeSelectFeatures(userDataTerms);
 		UtilityFunctions.writeFeaturesToFile();

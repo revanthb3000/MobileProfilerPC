@@ -89,7 +89,7 @@ public class Classifier {
 	}
 
 	public ArrayList<String> calculateFeaturesList() {
-		ArrayList<String> termsList = databaseConnector.getTermsList();
+		ArrayList<String> termsList = databaseConnector.getTermsList(false);
 		ArrayList<String> featuresList = new ArrayList<String>();
 		for (String term : termsList) {
 			double giniCoefficient = calculateGiniCoefficient(term);
@@ -101,7 +101,7 @@ public class Classifier {
 	}
 
 	public Map<String, Double> getGiniMapping() {
-		ArrayList<String> termsList = databaseConnector.getTermsList();
+		ArrayList<String> termsList = databaseConnector.getTermsList(false);
 		Map<String, Double> termGiniMapping = new HashMap<String, Double>();
 		ValueComparator valueComparator = new ValueComparator(termGiniMapping);
 		TreeMap<String, Double> sortedTermGiniMapping = new TreeMap<String, Double>(valueComparator);
@@ -115,7 +115,7 @@ public class Classifier {
 
 	public double calculateGiniCoefficient(String term) {
 		Map<Integer, TermDistributionDao> termDistributionDaos = databaseConnector
-				.getAllTermDistribution(term);
+				.getAllTermDistribution(term,false);
 		double giniCoefficient = 0.0;
 		List<Double> chiSquareValues = new ArrayList<Double>();
 		double chiSquareMean = 0;

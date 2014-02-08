@@ -235,10 +235,11 @@ public class DatabaseConnector {
 	 * Given a word and classId, this function will return a TermDistributionDao object which will also contain the 'A' value.
 	 * @param term
 	 * @param classId
+	 * @param isUserDataTable 
 	 * @return
 	 */
-	public TermDistributionDao getTermDistribution(String term, int classId) {
-		String query = "SELECT * from termdistribution where feature='" + term
+	public TermDistributionDao getTermDistribution(String term, int classId, boolean isUserDataTable) {
+		String query = "SELECT * from "+ (isUserDataTable?"userdataterms":"termdistribution")+" where feature='" + term
 				+ "' AND classId=" + classId + ";";
 
 		TermDistributionDao termDistributionDao = null;
@@ -261,10 +262,11 @@ public class DatabaseConnector {
 	/**
 	 * Given a term, this function will return a Map between classId and termDistributionDao objects. Useful function if you need the distribution of a term across all classes.
 	 * @param term
+	 * @param isUserDataTable 
 	 * @return
 	 */
-	public Map<Integer, TermDistributionDao> getAllTermDistribution(String term) {
-		String query = "SELECT * from termdistribution where feature='" + term
+	public Map<Integer, TermDistributionDao> getAllTermDistribution(String term, boolean isUserDataTable) {
+		String query = "SELECT * from "+ (isUserDataTable?"userdataterms":"termdistribution")+" where feature='" + term
 				+ "';";
 
 		Map<Integer, TermDistributionDao> termDistributionDaos = new HashMap<Integer, TermDistributionDao>();
@@ -345,7 +347,7 @@ public class DatabaseConnector {
 	 * @param tokens
 	 * @return
 	 */
-	public ArrayList<String> getTokensList(ArrayList<String> tokens) {
+	public ArrayList<String> getFeaturesFromTokensList(ArrayList<String> tokens) {
 		if (tokens.size() == 0) {
 			return null;
 		}
@@ -520,10 +522,11 @@ public class DatabaseConnector {
 
 	/**
 	 * Returns the list of all terms present in the database.
+	 * @param isUserDataTable 
 	 * @return
 	 */
-	public ArrayList<String> getTermsList() {
-		String query = "SELECT distinct(feature) from termdistribution;";
+	public ArrayList<String> getTermsList(boolean isUserDataTable) {
+		String query = "SELECT distinct(feature) from "+ (isUserDataTable?"userdataterms":"termdistribution")+";";
 		ArrayList<String> termsList = new ArrayList<String>();
 		try {
 			Statement statement = connection.createStatement();
@@ -605,10 +608,11 @@ public class DatabaseConnector {
 	 * Given a term and classId, this functions tells you if there's a <term,classId,A> mapping
 	 * @param term
 	 * @param classId
+	 * @param isUserDataTable 
 	 * @return
 	 */
-	public Boolean isTermPresentInClassDistribution(String term, int classId) {
-		String query = "SELECT * from termdistribution where feature='" + term
+	public Boolean isTermPresentInClassDistribution(String term, int classId, boolean isUserDataTable) {
+		String query = "SELECT * from "+(isUserDataTable?"userdataterms":"termdistribution")+" where feature='" + term
 				+ "' and classId = " + classId + ";";
 		Boolean isTermPrsentInDataBase = false;
 		try {
@@ -648,18 +652,18 @@ public class DatabaseConnector {
 	 * @param tokens
 	 * @param classId
 	 */
-	public void updateTermDistribution(ArrayList<String> tokens, int classId) {
+	public void updateTermDistribution(ArrayList<String> tokens, int classId, boolean isUserDataTable) {
 		ArrayList<String> oldTerms = new ArrayList<String>();
 		ArrayList<String> newTerms = new ArrayList<String>();
 		for (String term : tokens) {
-			if (!isTermPresentInClassDistribution(term, classId)) {
+			if (!isTermPresentInClassDistribution(term, classId,isUserDataTable)) {
 				newTerms.add(term);
 			} else {
 				oldTerms.add(term);
 			}
 		}
-		updateTermInfo(oldTerms, classId);
-		insertTermInfo(newTerms, classId);
+		updateTermInfo(oldTerms, classId,isUserDataTable);
+		insertTermInfo(newTerms, classId,isUserDataTable);
 	}
 
 	/**
@@ -667,15 +671,16 @@ public class DatabaseConnector {
 	 * 
 	 * @param newTerms
 	 * @param classId
+	 * @param isUserDataTable 
 	 */
-	public void insertTermInfo(ArrayList<String> newTerms, int classId) {
+	public void insertTermInfo(ArrayList<String> newTerms, int classId, boolean isUserDataTable) {
 		String query = "";
 		try {
 			Statement statement = connection.createStatement();
 			for (int i = 0; i < newTerms.size(); i++) {
 				if (i % 450 == 0) {
 					statement.executeUpdate(query);
-					query = "INSERT INTO `termdistribution` Select '"
+					query = "INSERT INTO `"+(isUserDataTable?"userdataterms":"termdistribution")+"` Select '"
 							+ newTerms.get(i) + "' AS `feature`, " + classId
 							+ " AS `classId`, 1 AS `A`";
 				} else {
@@ -696,11 +701,11 @@ public class DatabaseConnector {
 	 * @param oldTerms
 	 * @param classId
 	 */
-	public void updateTermInfo(ArrayList<String> oldTerms, int classId) {
+	public void updateTermInfo(ArrayList<String> oldTerms, int classId, boolean isUserDataTable) {
 		int numOfTerms = oldTerms.size();
 		int iterator = 0;
 		while (iterator < numOfTerms) {
-			String query = "Update termdistribution SET `A` = `A` + 1 Where (feature='"
+			String query = "Update "+ (isUserDataTable?"userdataterms":"termdistribution")+" SET `A` = `A` + 1 Where (feature='"
 					+ oldTerms.get(iterator) + "' ";
 			iterator++;
 			while (iterator % 950 != 0 && iterator < numOfTerms) {
@@ -718,7 +723,13 @@ public class DatabaseConnector {
 			}
 		}
 	}
-
+	
+	
+	
+	/*************************************************************************
+	 * Methods that work on the activities table follow
+	 **************************************************************************/
+	
 	/**
 	 * Basic function that inserts an activityDao into the Database.
 	 * @param activityDaos
@@ -834,131 +845,6 @@ public class DatabaseConnector {
 		}
 	}
 
-	/*************************************************************************
-	 * DB Calls on the temporary table follow:
-	 **************************************************************************/
 
-	/**
-	 * Gets a list of terms that have been encountered in the user's activities.
-	 * @return
-	 */
-	public ArrayList<String> getTermsInUserData() {
-		String query = "SELECT distinct(feature) from userdataterms;";
-		ArrayList<String> userTerms = new ArrayList<String>();
-		try {
-			Statement statement = connection.createStatement();
-			ResultSet resultSet;
-			resultSet = statement.executeQuery(query);
-			while (resultSet.next()) {
-				userTerms.add(resultSet.getString("feature"));
-			}
-		} catch (SQLException e) {
-			System.out.println("Exception Caught for query " + query + " \n"
-					+ e);
-			e.printStackTrace();
-		}
-		return userTerms;
-	}
-
-	/**
-	 * Similar to updating the termDistribution table. Different table, same story.
-	 * @param tokens
-	 * @param classId
-	 */
-	public void updateUserDataTermDistribution(ArrayList<String> tokens,
-			int classId) {
-		ArrayList<String> oldTerms = new ArrayList<String>();
-		ArrayList<String> newTerms = new ArrayList<String>();
-		for (String term : tokens) {
-			if (!isTermPresentInUserDataDistribution(term, classId)) {
-				newTerms.add(term);
-			} else {
-				oldTerms.add(term);
-			}
-		}
-		updateUserDataTermInfo(oldTerms, classId);
-		insertUserDataTermInfo(newTerms, classId);
-	}
-
-	/**
-	 * Checks if a term has been encountered in the user's profiled data.
-	 * @param term
-	 * @param classId
-	 * @return
-	 */
-	public Boolean isTermPresentInUserDataDistribution(String term, int classId) {
-		String query = "SELECT * from userdataterms where feature='" + term
-				+ "' and classId = " + classId + ";";
-		Boolean isTermPrsentInDataBase = false;
-		try {
-			Statement statement = connection.createStatement();
-			ResultSet resultSet;
-			resultSet = statement.executeQuery(query);
-			if (resultSet.next()) {
-				isTermPrsentInDataBase = true;
-			}
-		} catch (SQLException e) {
-			System.out.println("Exception Caught for query " + query + " \n"
-					+ e);
-			e.printStackTrace();
-		}
-		return isTermPrsentInDataBase;
-	}
-
-	/**
-	 * Adds new entries to the userDataTerms table.
-	 * @param newTerms
-	 * @param classId
-	 */
-	public void insertUserDataTermInfo(ArrayList<String> newTerms, int classId) {
-		String query = "";
-		try {
-			Statement statement = connection.createStatement();
-			for (int i = 0; i < newTerms.size(); i++) {
-				if (i % 450 == 0) {
-					statement.executeUpdate(query);
-					query = "INSERT INTO `userdataterms` Select '"
-							+ newTerms.get(i) + "' AS `feature`, " + classId
-							+ " AS `classId`, 1 AS `A`";
-				} else {
-					query += "UNION SELECT '" + newTerms.get(i) + "',"
-							+ classId + ",1 ";
-				}
-			}
-			statement.executeUpdate(query);
-		} catch (SQLException e) {
-			System.out.println("Exception Caught for query " + query + " \n"
-					+ e);
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Updates existing entries in the userDataTerms table.
-	 * @param oldTerms
-	 * @param classId
-	 */
-	public void updateUserDataTermInfo(ArrayList<String> oldTerms, int classId) {
-		int numOfTerms = oldTerms.size();
-		int iterator = 0;
-		while (iterator < numOfTerms) {
-			String query = "Update userdataterms SET `A` = `A` + 1 Where (feature='"
-					+ oldTerms.get(iterator) + "' ";
-			iterator++;
-			while (iterator % 950 != 0 && iterator < numOfTerms) {
-				query += " OR feature='" + oldTerms.get(iterator) + "'";
-				iterator++;
-			}
-			query += ") and classId=" + classId + ";";
-			try {
-				Statement statement = connection.createStatement();
-				statement.executeUpdate(query);
-			} catch (SQLException e) {
-				System.out.println("Exception Caught for query " + query
-						+ " \n" + e);
-				e.printStackTrace();
-			}
-		}
-	}
-
+	
 }

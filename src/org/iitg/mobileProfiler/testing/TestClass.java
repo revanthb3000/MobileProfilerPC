@@ -11,8 +11,7 @@ import java.io.IOException;
 public class TestClass {
 
 	public static void main(String[] args) throws IOException{
-		String className = UtilityFunctions.classifyUrl("https://github.com/revanthb3000", false);
+		String className = UtilityFunctions.classifyUrl("https://github.com/revanthb3000", true);
 		System.out.println(className);
-	}
-	
+	}	
 }
