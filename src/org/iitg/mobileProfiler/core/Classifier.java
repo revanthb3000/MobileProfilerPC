@@ -21,28 +21,29 @@ public class Classifier {
 
 	private ArrayList<Integer> classContents;
 
+	private ArrayList<Integer> userDataClassContents;
+
 	private DatabaseConnector databaseConnector;
 
 	private final int SUPPORT_FACTOR = 5;
-	
+
 	private final double GINI_THRESHOLD = 0.95;
 
 	public Classifier(DatabaseConnector inputDatabaseConnector) {
 		this.databaseConnector = inputDatabaseConnector;
-		this.totalNumberOfDocs = this.databaseConnector.getTotalNumberOfDocuments();
+		this.totalNumberOfDocs = this.databaseConnector
+				.getTotalNumberOfDocuments();
 		this.numberOfClasses = this.databaseConnector.getNumberOfClasses();
-		ArrayList<Integer> datasetClassContents  = this.databaseConnector.getNumberOfDocuments(0,this.numberOfClasses,false);
-		ArrayList<Integer> userDataClassContents = this.databaseConnector.getNumberOfDocuments(0, this.numberOfClasses , true);
-		this.classContents = new ArrayList<Integer>();
-		for(int id=0;id<userDataClassContents.size();id++){
-			this.classContents.add(datasetClassContents.get(id) + userDataClassContents.get(id));
-		}
+		this.classContents = this.databaseConnector.getNumberOfDocuments(0,
+				this.numberOfClasses, false);
+		this.userDataClassContents = this.databaseConnector
+				.getNumberOfDocuments(0, this.numberOfClasses, true);
 	}
-	
+
 	public int getSupportFactor() {
 		return SUPPORT_FACTOR;
 	}
-	
+
 	public double getGiniThreshold() {
 		return GINI_THRESHOLD;
 	}
@@ -53,37 +54,106 @@ public class Classifier {
 
 	public int classifyDoc(ArrayList<String> tokens) {
 		int numOfMatchedFeatures = 0;
-		ArrayList<Double> probabilities = new ArrayList<Double>();
+		ArrayList<Double> datasetClassifierProbabilities = new ArrayList<Double>();
+		ArrayList<Double> userDataClassifierProbabilities = new ArrayList<Double>();
 		Double temp = 0.0;
 		for (int i = 0; i < numberOfClasses; i++) {
 			temp = (1.0 * classContents.get(i))/* / totalNumberOfDocs */;
-			probabilities.add(temp);
+			datasetClassifierProbabilities.add(temp);
+			temp = (1.0 * userDataClassContents.get(i))/* / totalNumberOfDocs */;
+			userDataClassifierProbabilities.add(temp);
 		}
 
-		Map<String, Map<Integer, TermDistributionDao>> termDistributions = databaseConnector.getAllTokensDistribution(tokens);
+		Map<String, Map<Integer, TermDistributionDao>> termDistributions = databaseConnector.getAllTokensDistribution(tokens, false);
+		Map<String, Map<Integer, TermDistributionDao>> userDataTermDistributions = databaseConnector.getAllTokensDistribution(tokens, true);
 
+		
+		ArrayList<Double> productProbabilities = new ArrayList<Double>();
+		for(int i=0;i<numberOfClasses;i++){
+			productProbabilities.add(-1.0);
+		}
 		for (String token : tokens) {
 			numOfMatchedFeatures++;
 			for (int i = 0; i < numberOfClasses; i++) {
 				int termDistA = 0;
-				if(!termDistributions.containsKey(token)){
+				if (!termDistributions.containsKey(token)) {
 					continue;
 				}
 				if (termDistributions.get(token).containsKey(i)) {
 					termDistA = termDistributions.get(token).get(i).getA();
 				}
 				temp = 1000 * ((1.0 * (1 + termDistA)) / (classContents.get(i) + numberOfClasses));
-				probabilities.set(i, temp * probabilities.get(i));
+				if(productProbabilities.get(i)<0){
+					productProbabilities.set(i, temp);
+				}
+				else{
+					productProbabilities.set(i, temp*productProbabilities.get(i));
+				}
 			}
 		}
+		for(int i=0;i<numberOfClasses;i++){
+			temp = productProbabilities.get(i);
+			if(temp<0){
+				temp = 0.0;
+			}
+			datasetClassifierProbabilities.set(i, temp);
+		}
+		
+		productProbabilities.clear();
+		for(int i=0;i<numberOfClasses;i++){
+			productProbabilities.add(-1.0);
+		}
+		for (String token : tokens) {
+			numOfMatchedFeatures++;
+			for (int i = 0; i < numberOfClasses; i++) {
+				int termDistA = 0;
+				if (!userDataTermDistributions.containsKey(token)) {
+					continue;
+				}
+				if (userDataTermDistributions.get(token).containsKey(i)) {
+					termDistA = userDataTermDistributions.get(token).get(i).getA();
+				}
+				temp = 1000 * ((1.0 * (1 + termDistA)) / (userDataClassContents.get(i) + numberOfClasses));
+				if(productProbabilities.get(i)<0){
+					productProbabilities.set(i, temp);
+				}
+				else{
+					productProbabilities.set(i, temp*productProbabilities.get(i));
+				}
+			}
+		}
+		for(int i=0;i<numberOfClasses;i++){
+			temp = productProbabilities.get(i);
+			if(temp<0){
+				temp = 0.0;
+			}
+			userDataClassifierProbabilities.set(i, temp);
+		}
+		
 		if (numOfMatchedFeatures == 0) {
 			return -1;
 		}
+		ArrayList<Double> combinedProbabilities = new ArrayList<Double>();
+		for (int i = 0; i < numberOfClasses; i++) {
+			double alpha = 1.0;
+			double beta = 0.0;
+			if(userDataClassContents.get(i)>=5){
+				beta = classContents.get(i)/userDataClassContents.get(i);
+				alpha = 1- beta;
+				if(beta>0.5){
+					alpha = 0.5;
+					beta = 0.5;
+				}
+			}
+			Double combinedProbability = (alpha * datasetClassifierProbabilities.get(i)) + (beta * userDataClassifierProbabilities.get(i));
+			combinedProbabilities.add(combinedProbability);
+		}
+
 		int maxIndex = 0;
 		Double maximumValue = -1.0;
 		for (int i = 0; i < numberOfClasses; i++) {
-			if (probabilities.get(i) > maximumValue) {
-				maximumValue = probabilities.get(i);
+			if (combinedProbabilities.get(i) > maximumValue) {
+				maximumValue = combinedProbabilities.get(i);
 				maxIndex = i;
 			}
 		}
@@ -97,9 +167,10 @@ public class Classifier {
 
 	public ArrayList<String> calculateFeaturesList() {
 		ArrayList<String> termsList = databaseConnector.getTermsList(false);
-		ArrayList<String> userDataTermsList = databaseConnector.getTermsList(true);
-		for(String term : userDataTermsList){
-			if(!termsList.contains(term)){
+		ArrayList<String> userDataTermsList = databaseConnector
+				.getTermsList(true);
+		for (String term : userDataTermsList) {
+			if (!termsList.contains(term)) {
 				termsList.add(term);
 			}
 		}
@@ -115,18 +186,20 @@ public class Classifier {
 
 	public Map<String, Double> getGiniMapping() {
 		ArrayList<String> termsList = databaseConnector.getTermsList(false);
-		ArrayList<String> userDataTermsList = databaseConnector.getTermsList(true);
-		for(String term : userDataTermsList){
-			if(!termsList.contains(term)){
+		ArrayList<String> userDataTermsList = databaseConnector
+				.getTermsList(true);
+		for (String term : userDataTermsList) {
+			if (!termsList.contains(term)) {
 				termsList.add(term);
 			}
 		}
 		Map<String, Double> termGiniMapping = new HashMap<String, Double>();
 		ValueComparator valueComparator = new ValueComparator(termGiniMapping);
-		TreeMap<String, Double> sortedTermGiniMapping = new TreeMap<String, Double>(valueComparator);
+		TreeMap<String, Double> sortedTermGiniMapping = new TreeMap<String, Double>(
+				valueComparator);
 		for (String term : termsList) {
 			double giniCoefficient = calculateGiniCoefficient(term);
-			if(term.equals("revanth")){
+			if (term.equals("revanth")) {
 				System.out.println("Howdy !! " + giniCoefficient);
 			}
 			termGiniMapping.put(term, giniCoefficient);
@@ -136,27 +209,30 @@ public class Classifier {
 	}
 
 	public double calculateGiniCoefficient(String term) {
-		Map<Integer, TermDistributionDao> termDistributionDaos = databaseConnector.getAllTermDistribution(term,false);
-		Map<Integer, TermDistributionDao> userDataTermDistributionDaos = databaseConnector.getAllTermDistribution(term,true);
+		Map<Integer, TermDistributionDao> termDistributionDaos = databaseConnector
+				.getAllTermDistribution(term, false);
+		Map<Integer, TermDistributionDao> userDataTermDistributionDaos = databaseConnector
+				.getAllTermDistribution(term, true);
 		double giniCoefficient = 0.0;
 		List<Double> chiSquareValues = new ArrayList<Double>();
 		double chiSquareMean = 0;
 		int totalNumberOfOccurences = 0;
 		TermDistributionDao termDistributionDao = null, userDataTermDistributionDao = null;
 		Set<Integer> classIdSet = new HashSet<Integer>();
-		for(Integer classId : termDistributionDaos.keySet()){
+		for (Integer classId : termDistributionDaos.keySet()) {
 			classIdSet.add(classId);
 		}
-		for(Integer classId : userDataTermDistributionDaos.keySet()){
-				classIdSet.add(classId);
+		for (Integer classId : userDataTermDistributionDaos.keySet()) {
+			classIdSet.add(classId);
 		}
 		for (int classId : classIdSet) {
 			termDistributionDao = termDistributionDaos.get(classId);
-			userDataTermDistributionDao = userDataTermDistributionDaos.get(classId);
-			if(termDistributionDao!=null){
+			userDataTermDistributionDao = userDataTermDistributionDaos
+					.get(classId);
+			if (termDistributionDao != null) {
 				totalNumberOfOccurences += termDistributionDao.getA();
 			}
-			if(userDataTermDistributionDao!=null){
+			if (userDataTermDistributionDao != null) {
 				totalNumberOfOccurences += userDataTermDistributionDao.getA();
 			}
 		}
@@ -170,7 +246,7 @@ public class Classifier {
 			if (termDistributionDaos.containsKey(classId)) {
 				A += termDistributionDaos.get(classId).getA();
 			}
-			if(userDataTermDistributionDaos.containsKey(classId)){
+			if (userDataTermDistributionDaos.containsKey(classId)) {
 				A += userDataTermDistributionDaos.get(classId).getA();
 			}
 			double chiSquare = calculateChiSquare(A, totalNumberOfOccurences
@@ -190,7 +266,8 @@ public class Classifier {
 	}
 
 	public double calculateChiSquare(int A, int B, int classId) {
-		int C = classContents.get(classId) - A;
+		int C = (classContents.get(classId) + userDataClassContents
+				.get(classId)) - A;
 		int D = totalNumberOfDocs - (A + B + C);
 		double chiSquare = totalNumberOfDocs;
 		chiSquare /= (A + C);
@@ -211,7 +288,8 @@ class ValueComparator implements Comparator<String> {
 	}
 
 	/**
-	 * Why do I have a minus sign in there ? It's to get my things in a descending order.
+	 * Why do I have a minus sign in there ? It's to get my things in a
+	 * descending order.
 	 */
 	public int compare(String a, String b) {
 		return -Double.compare(base.get(a), base.get(b));

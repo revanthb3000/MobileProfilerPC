@@ -318,15 +318,16 @@ public class DatabaseConnector {
 	/**
 	 * Similar to the previous function. Given a set of tokens, a Map is returned that will contain info of the termDistribution of each term present in the ArrayList.
 	 * @param tokens
+	 * @param isUserDataTable 
 	 * @return
 	 */
 	public Map<String, Map<Integer, TermDistributionDao>> getAllTokensDistribution(
-			ArrayList<String> tokens) {
+			ArrayList<String> tokens, boolean isUserDataTable) {
 		if (tokens.size() == 0) {
 			return null;
 		}
 		String term = tokens.get(0), previousTerm = tokens.get(0);
-		String query = "SELECT * from termdistribution where feature='" + term
+		String query = "SELECT * from "+ (isUserDataTable?"userdataterms":"termdistribution")+" where feature='" + term
 				+ "'";
 		for (int i = 1; i < tokens.size(); i++) {
 			term = tokens.get(i);

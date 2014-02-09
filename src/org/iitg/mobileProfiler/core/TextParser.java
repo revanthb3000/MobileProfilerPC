@@ -28,6 +28,7 @@ public class TextParser {
 	/**
 	 * Cleans the string. Splits it and then removes the stop words. The words
 	 * that are left are stemmed and returned as an arraylist.
+	 * Also, only the words that are features are piped out !
 	 * 
 	 * @param inputString
 	 * @return
@@ -50,8 +51,7 @@ public class TextParser {
 				continue;
 			}
 			if (!(isWordFeature.containsKey(splitWord))) {
-				isWordFeature.put(splitWord,
-						databaseConnector.isTermFeature(splitWord));
+				isWordFeature.put(splitWord,databaseConnector.isTermFeature(splitWord));
 			}
 			if (isWordFeature.get(splitWord)) {
 				tokens.add(splitWord);
