@@ -109,6 +109,12 @@ public class DatabaseConnector {
 					+ "`A` int(11) NOT NULL,"
 					+ "PRIMARY KEY (`feature`,`classId`));";
 			statement.executeUpdate(query);
+			
+			query = "CREATE TABLE IF NOT EXISTS `userdataclasscontents` "
+					+ "(`classId` int(11) NOT NULL,`numberOfDocs` "
+					+ "int(11) NOT NULL,PRIMARY KEY (`classId`));";
+			statement.executeUpdate(query);
+			
 		} catch (SQLException e) {
 			System.out.println("Exception Caught for query " + query + " \n"
 					+ e);
@@ -130,6 +136,26 @@ public class DatabaseConnector {
 				query = "INSERT INTO `classcontents`"
 						+ " (`classId` ,`numberOfDocs`)" + "VALUES ('" + i
 						+ "', '" + classContents.get(i) + "');";
+				statement.executeUpdate(query);
+			}
+		} catch (SQLException e) {
+			System.out.println("Exception Caught for query " + query + " \n"
+					+ e);
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Basically fills the userDataClassContents table with initial mappings. Everything is set to zero.
+	 */
+	public void fillUserDataClassContents(){
+		String query = "";
+		try {
+			Statement statement = connection.createStatement();
+			for (int i = 0; i < getNumberOfClasses(); i++) {
+				query = "INSERT INTO `userdataclasscontents`"
+						+ " (`classId` ,`numberOfDocs`)" + "VALUES ('" + i
+						+ "', '" + 0 + "');";
 				statement.executeUpdate(query);
 			}
 		} catch (SQLException e) {
@@ -474,11 +500,11 @@ public class DatabaseConnector {
 	 * Returns the number of docs. that belong the classIds between two numbers.
 	 * @param startingClassId
 	 * @param endingClassId
+	 * @param isUserDataTable 
 	 * @return
 	 */
-	public ArrayList<Integer> getNumberOfDocuments(int startingClassId,
-			int endingClassId) {
-		String query = "SELECT numberOfDocs from classcontents where classId>="
+	public ArrayList<Integer> getNumberOfDocuments(int startingClassId, int endingClassId, boolean isUserDataTable) {
+		String query = "SELECT numberOfDocs from " + (isUserDataTable?"userdataclasscontents":"classcontents") + " where classId>="
 				+ startingClassId + " AND classId<=" + endingClassId + ";";
 		ArrayList<Integer> classContents = new ArrayList<Integer>();
 		try {
@@ -634,9 +660,8 @@ public class DatabaseConnector {
 	 * Given a classId, the class contents for that classId are incremented.
 	 * @param classId
 	 */
-	public void updateClassContents(int classId) {
-		String query = "Update `classcontents` SET numberOfDocs = numberOfDocs + 1 Where classId="
-				+ classId + ";";
+	public void updateClassContents(int classId, boolean isUserDataTable) {
+		String query = "Update `" + (isUserDataTable?"userdataclasscontents":"classcontents") + "` SET numberOfDocs = numberOfDocs + 1 Where classId=" + classId + ";";
 		try {
 			Statement statement = connection.createStatement();
 			statement.executeUpdate(query);
@@ -680,7 +705,7 @@ public class DatabaseConnector {
 			for (int i = 0; i < newTerms.size(); i++) {
 				if (i % 450 == 0) {
 					statement.executeUpdate(query);
-					query = "INSERT INTO `"+(isUserDataTable?"userdataterms":"termdistribution")+"` Select '"
+					query = "INSERT INTO `" + (isUserDataTable?"userdataterms":"termdistribution") + "` Select '"
 							+ newTerms.get(i) + "' AS `feature`, " + classId
 							+ " AS `classId`, 1 AS `A`";
 				} else {

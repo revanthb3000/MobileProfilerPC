@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.iitg.mobileProfiler.db.DatabaseConnector;
@@ -21,17 +23,20 @@ public class Classifier {
 
 	private DatabaseConnector databaseConnector;
 
-	private final int SUPPORT_FACTOR = 20;
+	private final int SUPPORT_FACTOR = 5;
 	
 	private final double GINI_THRESHOLD = 0.95;
 
 	public Classifier(DatabaseConnector inputDatabaseConnector) {
 		this.databaseConnector = inputDatabaseConnector;
-		this.totalNumberOfDocs = this.databaseConnector
-				.getTotalNumberOfDocuments();
+		this.totalNumberOfDocs = this.databaseConnector.getTotalNumberOfDocuments();
 		this.numberOfClasses = this.databaseConnector.getNumberOfClasses();
-		this.classContents = this.databaseConnector.getNumberOfDocuments(0,
-				this.totalNumberOfDocs);
+		ArrayList<Integer> datasetClassContents  = this.databaseConnector.getNumberOfDocuments(0,this.numberOfClasses,false);
+		ArrayList<Integer> userDataClassContents = this.databaseConnector.getNumberOfDocuments(0, this.numberOfClasses , true);
+		this.classContents = new ArrayList<Integer>();
+		for(int id=0;id<userDataClassContents.size();id++){
+			this.classContents.add(datasetClassContents.get(id) + userDataClassContents.get(id));
+		}
 	}
 	
 	public int getSupportFactor() {
@@ -55,13 +60,15 @@ public class Classifier {
 			probabilities.add(temp);
 		}
 
-		Map<String, Map<Integer, TermDistributionDao>> termDistributions = databaseConnector
-				.getAllTokensDistribution(tokens);
+		Map<String, Map<Integer, TermDistributionDao>> termDistributions = databaseConnector.getAllTokensDistribution(tokens);
 
 		for (String token : tokens) {
 			numOfMatchedFeatures++;
 			for (int i = 0; i < numberOfClasses; i++) {
 				int termDistA = 0;
+				if(!termDistributions.containsKey(token)){
+					continue;
+				}
 				if (termDistributions.get(token).containsKey(i)) {
 					termDistA = termDistributions.get(token).get(i).getA();
 				}
@@ -90,6 +97,12 @@ public class Classifier {
 
 	public ArrayList<String> calculateFeaturesList() {
 		ArrayList<String> termsList = databaseConnector.getTermsList(false);
+		ArrayList<String> userDataTermsList = databaseConnector.getTermsList(true);
+		for(String term : userDataTermsList){
+			if(!termsList.contains(term)){
+				termsList.add(term);
+			}
+		}
 		ArrayList<String> featuresList = new ArrayList<String>();
 		for (String term : termsList) {
 			double giniCoefficient = calculateGiniCoefficient(term);
@@ -102,11 +115,20 @@ public class Classifier {
 
 	public Map<String, Double> getGiniMapping() {
 		ArrayList<String> termsList = databaseConnector.getTermsList(false);
+		ArrayList<String> userDataTermsList = databaseConnector.getTermsList(true);
+		for(String term : userDataTermsList){
+			if(!termsList.contains(term)){
+				termsList.add(term);
+			}
+		}
 		Map<String, Double> termGiniMapping = new HashMap<String, Double>();
 		ValueComparator valueComparator = new ValueComparator(termGiniMapping);
 		TreeMap<String, Double> sortedTermGiniMapping = new TreeMap<String, Double>(valueComparator);
 		for (String term : termsList) {
 			double giniCoefficient = calculateGiniCoefficient(term);
+			if(term.equals("revanth")){
+				System.out.println("Howdy !! " + giniCoefficient);
+			}
 			termGiniMapping.put(term, giniCoefficient);
 		}
 		sortedTermGiniMapping.putAll(termGiniMapping);
@@ -114,16 +136,29 @@ public class Classifier {
 	}
 
 	public double calculateGiniCoefficient(String term) {
-		Map<Integer, TermDistributionDao> termDistributionDaos = databaseConnector
-				.getAllTermDistribution(term,false);
+		Map<Integer, TermDistributionDao> termDistributionDaos = databaseConnector.getAllTermDistribution(term,false);
+		Map<Integer, TermDistributionDao> userDataTermDistributionDaos = databaseConnector.getAllTermDistribution(term,true);
 		double giniCoefficient = 0.0;
 		List<Double> chiSquareValues = new ArrayList<Double>();
 		double chiSquareMean = 0;
 		int totalNumberOfOccurences = 0;
-		TermDistributionDao termDistributionDao = null;
-		for (int classId : termDistributionDaos.keySet()) {
+		TermDistributionDao termDistributionDao = null, userDataTermDistributionDao = null;
+		Set<Integer> classIdSet = new HashSet<Integer>();
+		for(Integer classId : termDistributionDaos.keySet()){
+			classIdSet.add(classId);
+		}
+		for(Integer classId : userDataTermDistributionDaos.keySet()){
+				classIdSet.add(classId);
+		}
+		for (int classId : classIdSet) {
 			termDistributionDao = termDistributionDaos.get(classId);
-			totalNumberOfOccurences += termDistributionDao.getA();
+			userDataTermDistributionDao = userDataTermDistributionDaos.get(classId);
+			if(termDistributionDao!=null){
+				totalNumberOfOccurences += termDistributionDao.getA();
+			}
+			if(userDataTermDistributionDao!=null){
+				totalNumberOfOccurences += userDataTermDistributionDao.getA();
+			}
 		}
 		// If support factor constraint is not satisfied, I'm getting rid of the
 		// term.
@@ -133,7 +168,10 @@ public class Classifier {
 		for (int classId = 0; classId < numberOfClasses; classId++) {
 			int A = 0;
 			if (termDistributionDaos.containsKey(classId)) {
-				A = termDistributionDaos.get(classId).getA();
+				A += termDistributionDaos.get(classId).getA();
+			}
+			if(userDataTermDistributionDaos.containsKey(classId)){
+				A += userDataTermDistributionDaos.get(classId).getA();
 			}
 			double chiSquare = calculateChiSquare(A, totalNumberOfOccurences
 					- A, classId);
@@ -163,7 +201,6 @@ public class Classifier {
 		chiSquare *= (A * D - B * C);
 		return chiSquare;
 	}
-
 }
 
 class ValueComparator implements Comparator<String> {

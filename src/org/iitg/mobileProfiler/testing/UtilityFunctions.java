@@ -190,7 +190,7 @@ public class UtilityFunctions {
 		System.out.println("Number of terms is : " + textParser.getAllTokens(sourceCode, true).size());
 		
 		if (shouldMerge && (!className.equals(""))) {
-			databaseConnector.updateClassContents(classId);
+			databaseConnector.updateClassContents(classId,true);
 			databaseConnector.updateTermDistribution(textParser.getAllTokens(sourceCode, true), classId, true);
 			System.out.println("Finished updating distribution");
 		}
@@ -275,6 +275,7 @@ public class UtilityFunctions {
 		databaseConnector.fillClassMappings();
 		System.out.println("Mappings Filled");
 		databaseConnector.fillClassContents();
+		databaseConnector.fillUserDataClassContents();
 		System.out.println("Contents Filled");
 		databaseConnector.fillFeaturesList();
 		System.out.println("Features List Filled");
