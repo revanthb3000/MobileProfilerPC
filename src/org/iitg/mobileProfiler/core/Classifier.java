@@ -108,7 +108,7 @@ public class Classifier {
 			for (int i = 0; i < numberOfClasses; i++) {
 				int termDistA = 0;
 				if (!userDataTermDistributions.containsKey(token)) {
-					continue;
+					continue;	//Basically, if this feature is not present in the user data, we ignore it.
 				}
 				if (userDataTermDistributions.get(token).containsKey(i)) {
 					termDistA = userDataTermDistributions.get(token).get(i).getA();
@@ -135,14 +135,17 @@ public class Classifier {
 		}
 		ArrayList<Double> combinedProbabilities = new ArrayList<Double>();
 		for (int i = 0; i < numberOfClasses; i++) {
-			double alpha = 1.0;
-			double beta = 0.0;
-			if(userDataClassContents.get(i)>=5){
-				beta = classContents.get(i)/userDataClassContents.get(i);
-				alpha = 1- beta;
-				if(beta>0.5){
+			double alpha = 1.0, beta = 0.0;
+			double c1 = classContents.get(i);
+			double c2 = userDataClassContents.get(i);
+			if(c2>=5){
+				if(c2>=c1){
 					alpha = 0.5;
 					beta = 0.5;
+				}
+				else{
+					beta = c1/(c1+c2);
+					alpha = c2/(c1+c2);
 				}
 			}
 			Double combinedProbability = (alpha * datasetClassifierProbabilities.get(i)) + (beta * userDataClassifierProbabilities.get(i));
