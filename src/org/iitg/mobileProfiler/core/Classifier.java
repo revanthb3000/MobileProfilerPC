@@ -76,10 +76,7 @@ public class Classifier {
 			numOfMatchedFeatures++;
 			for (int i = 0; i < numberOfClasses; i++) {
 				int termDistA = 0;
-				if (!termDistributions.containsKey(token)) {
-					continue;
-				}
-				if (termDistributions.get(token).containsKey(i)) {
+				if ((termDistributions.containsKey(token))&&(termDistributions.get(token).containsKey(i))) {
 					termDistA = termDistributions.get(token).get(i).getA();
 				}
 				temp = 1000 * ((1.0 * (1 + termDistA)) / (classContents.get(i) + numberOfClasses));
@@ -107,10 +104,7 @@ public class Classifier {
 			numOfMatchedFeatures++;
 			for (int i = 0; i < numberOfClasses; i++) {
 				int termDistA = 0;
-				if (!userDataTermDistributions.containsKey(token)) {
-					continue;	//Basically, if this feature is not present in the user data, we ignore it.
-				}
-				if (userDataTermDistributions.get(token).containsKey(i)) {
+				if ((userDataTermDistributions.containsKey(token))&&(userDataTermDistributions.get(token).containsKey(i))) {
 					termDistA = userDataTermDistributions.get(token).get(i).getA();
 				}
 				temp = 1000 * ((1.0 * (1 + termDistA)) / (userDataClassContents.get(i) + numberOfClasses));
