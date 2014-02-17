@@ -164,6 +164,26 @@ public class UtilityFunctions {
 	}
 
 	/**
+	 * Given a fileName, this functions dumps the classcontents table into it.
+	 * @param fileName
+	 * @param isUserDataTable
+	 * @throws IOException
+	 */
+	public static void writeClassContentsToFile(String fileName, boolean isUserDataTable) throws IOException{
+		DatabaseConnector databaseConnector = new DatabaseConnector();
+		int numberOfClasses = databaseConnector.getNumberOfClasses();
+		ArrayList<Integer> classContents = databaseConnector.getNumberOfDocuments(0, numberOfClasses, isUserDataTable);
+		databaseConnector.closeDBConnection();
+		FileWriter fileWriter = new FileWriter(fileName);
+		BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+		for(Integer numberOfDocs : classContents){
+			bufferedWriter.write(numberOfDocs + " ");
+		}
+		bufferedWriter.close();
+		fileWriter.close();
+	}
+	
+	/**
 	 * This function takes in a URL and classifies it. Crucial part of the
 	 * android program too.
 	 * 

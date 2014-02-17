@@ -13,7 +13,8 @@ public class TestClass {
 	public static void main(String[] args) throws IOException{
 		String className = UtilityFunctions.classifyUrl("https://github.com/revanthb3000", false);
 		System.out.println(className);
-		UtilityFunctions.recomputeFeatures();
-		UtilityFunctions.writeFeaturesToFile();
+//		UtilityFunctions.recomputeFeatures();
+//		UtilityFunctions.writeFeaturesToFile();
+		UtilityFunctions.writeClassContentsToFile("classContents.txt", true);
 	}	
 }
