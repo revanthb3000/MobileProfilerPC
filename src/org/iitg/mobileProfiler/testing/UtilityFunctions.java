@@ -35,8 +35,8 @@ public class UtilityFunctions {
 	 * Classifies the entire experimentalOutput.txt file and puts those changes into the DB. Also outputs the features and gini Mapping files.
 	 * @throws IOException
 	 */
-	public static void classifyExperimentalOutput() throws IOException{
-		ArrayList<String> webPages = ExperimentalOutputWorker.parseFile("experimentalOutput.txt");
+	public static void classifyExperimentalOutput(String webHistoryFileName) throws IOException{
+		ArrayList<String> webPages = ExperimentalOutputWorker.parseFile(webHistoryFileName);
 		ExperimentalOutputWorker.classifyPages(webPages,true);
 		recomputeFeatures();
 		writeFeaturesToFile();

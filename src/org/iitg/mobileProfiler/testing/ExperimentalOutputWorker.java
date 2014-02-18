@@ -53,9 +53,14 @@ public class ExperimentalOutputWorker {
 				System.out.println("Class is : " + className + "\n");
 				classifiedCount++;
 			}
+			if(classifiedCount%5==0){
+				UtilityFunctions.recomputeFeatures();
+				System.out.println("Recomputing is done !");
+			}
 		}
 		System.out.println("Total number of pages is : " + totalCount);
 		System.out.println("Total number of pages classified is : " + classifiedCount);
+		UtilityFunctions.recomputeFeatures();
 	}
 	
 }

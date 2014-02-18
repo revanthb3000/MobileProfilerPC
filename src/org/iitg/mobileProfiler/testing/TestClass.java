@@ -13,8 +13,11 @@ public class TestClass {
 	public static void main(String[] args) throws IOException{
 		String className = UtilityFunctions.classifyUrl("https://github.com/revanthb3000", false);
 		System.out.println(className);
-//		UtilityFunctions.recomputeFeatures();
-//		UtilityFunctions.writeFeaturesToFile();
-		UtilityFunctions.writeClassContentsToFile("classContents.txt", true);
+		className = UtilityFunctions.classifyUrl("http://cricinfo.com", false);
+		System.out.println(className);
+		className = UtilityFunctions.classifyUrl("http://nfl.com", false);
+		System.out.println(className);
+//		UtilityFunctions.classifyExperimentalOutput("experimentalOutput.txt");
+//		UtilityFunctions.writeClassContentsToFile("classContents.txt", true);
 	}	
 }
