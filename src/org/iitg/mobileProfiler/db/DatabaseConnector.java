@@ -80,9 +80,9 @@ public class DatabaseConnector {
 			statement.executeUpdate(query);
 
 			query = "CREATE TABLE IF NOT EXISTS `termdistribution` "
-					+ "(`feature` varchar(255) NOT NULL,`classId` int(11) NOT NULL,"
+					+ "(`term` varchar(255) NOT NULL,`classId` int(11) NOT NULL,"
 					+ "`A` int(11) NOT NULL,"
-					+ "PRIMARY KEY (`feature`,`classId`));";
+					+ "PRIMARY KEY (`term`,`classId`));";
 			statement.executeUpdate(query);
 
 			query = "CREATE TABLE IF NOT EXISTS `classmapping` "
@@ -105,9 +105,9 @@ public class DatabaseConnector {
 			statement.executeUpdate(query);
 
 			query = "CREATE TABLE IF NOT EXISTS `userdataterms` "
-					+ "(`feature` varchar(255) NOT NULL,`classId` int(11) NOT NULL,"
+					+ "(`term` varchar(255) NOT NULL,`classId` int(11) NOT NULL,"
 					+ "`A` int(11) NOT NULL,"
-					+ "PRIMARY KEY (`feature`,`classId`));";
+					+ "PRIMARY KEY (`term`,`classId`));";
 			statement.executeUpdate(query);
 			
 			query = "CREATE TABLE IF NOT EXISTS `userdataclasscontents` "
@@ -210,7 +210,7 @@ public class DatabaseConnector {
 				for (int i = 0; i < featureDistribution.featureClassRelation
 						.size(); i++) {
 					if (featureDistribution.featureClassRelation.get(i).getA() != 0) {
-						query = "INSERT INTO `termdistribution`(`feature` ,`classId` ,`A`) VALUES ('"
+						query = "INSERT INTO `termdistribution`(`term` ,`classId` ,`A`) VALUES ('"
 								+ featureDistribution.getFeatureName()
 								+ "', '"
 								+ i
@@ -265,7 +265,7 @@ public class DatabaseConnector {
 	 * @return
 	 */
 	public TermDistributionDao getTermDistribution(String term, int classId, boolean isUserDataTable) {
-		String query = "SELECT * from "+ (isUserDataTable?"userdataterms":"termdistribution")+" where feature='" + term
+		String query = "SELECT * from "+ (isUserDataTable?"userdataterms":"termdistribution")+" where term='" + term
 				+ "' AND classId=" + classId + ";";
 
 		TermDistributionDao termDistributionDao = null;
@@ -292,7 +292,7 @@ public class DatabaseConnector {
 	 * @return
 	 */
 	public Map<Integer, TermDistributionDao> getAllTermDistribution(String term, boolean isUserDataTable) {
-		String query = "SELECT * from "+ (isUserDataTable?"userdataterms":"termdistribution")+" where feature='" + term
+		String query = "SELECT * from "+ (isUserDataTable?"userdataterms":"termdistribution")+" where term='" + term
 				+ "';";
 
 		Map<Integer, TermDistributionDao> termDistributionDaos = new HashMap<Integer, TermDistributionDao>();
@@ -327,7 +327,7 @@ public class DatabaseConnector {
 			return null;
 		}
 		String term = tokens.get(0), previousTerm = tokens.get(0);
-		String query = "SELECT * from "+ (isUserDataTable?"userdataterms":"termdistribution")+" where feature='" + term
+		String query = "SELECT * from "+ (isUserDataTable?"userdataterms":"termdistribution")+" where term='" + term
 				+ "'";
 		for (int i = 1; i < tokens.size(); i++) {
 			term = tokens.get(i);
@@ -335,7 +335,7 @@ public class DatabaseConnector {
 				continue;
 			}
 			previousTerm = term;
-			query += " OR feature='" + term + "'";
+			query += " OR term='" + term + "'";
 		}
 		query += ";";
 		Map<String, Map<Integer, TermDistributionDao>> termDistributionMap = new HashMap<String, Map<Integer, TermDistributionDao>>();
@@ -344,7 +344,7 @@ public class DatabaseConnector {
 			ResultSet resultSet;
 			resultSet = statement.executeQuery(query);
 			while (resultSet.next()) {
-				String token = resultSet.getString("feature");
+				String token = resultSet.getString("term");
 				int classId = resultSet.getInt("classId");
 				int A = resultSet.getInt("a");
 				TermDistributionDao termDistributionDao = new TermDistributionDao(
@@ -553,14 +553,14 @@ public class DatabaseConnector {
 	 * @return
 	 */
 	public ArrayList<String> getTermsList(boolean isUserDataTable) {
-		String query = "SELECT distinct(feature) from "+ (isUserDataTable?"userdataterms":"termdistribution")+";";
+		String query = "SELECT distinct(term) from "+ (isUserDataTable?"userdataterms":"termdistribution")+";";
 		ArrayList<String> termsList = new ArrayList<String>();
 		try {
 			Statement statement = connection.createStatement();
 			ResultSet resultSet;
 			resultSet = statement.executeQuery(query);
 			while (resultSet.next()) {
-				termsList.add(resultSet.getString("feature"));
+				termsList.add(resultSet.getString("term"));
 			}
 		} catch (SQLException e) {
 			System.out.println("Exception Caught for query " + query + " \n"
@@ -639,7 +639,7 @@ public class DatabaseConnector {
 	 * @return
 	 */
 	public Boolean isTermPresentInClassDistribution(String term, int classId, boolean isUserDataTable) {
-		String query = "SELECT * from "+(isUserDataTable?"userdataterms":"termdistribution")+" where feature='" + term
+		String query = "SELECT * from "+(isUserDataTable?"userdataterms":"termdistribution")+" where term='" + term
 				+ "' and classId = " + classId + ";";
 		Boolean isTermPrsentInDataBase = false;
 		try {
@@ -707,7 +707,7 @@ public class DatabaseConnector {
 				if (i % 450 == 0) {
 					statement.executeUpdate(query);
 					query = "INSERT INTO `" + (isUserDataTable?"userdataterms":"termdistribution") + "` Select '"
-							+ newTerms.get(i) + "' AS `feature`, " + classId
+							+ newTerms.get(i) + "' AS `term`, " + classId
 							+ " AS `classId`, 1 AS `A`";
 				} else {
 					query += "UNION SELECT '" + newTerms.get(i) + "',"
@@ -731,11 +731,11 @@ public class DatabaseConnector {
 		int numOfTerms = oldTerms.size();
 		int iterator = 0;
 		while (iterator < numOfTerms) {
-			String query = "Update "+ (isUserDataTable?"userdataterms":"termdistribution")+" SET `A` = `A` + 1 Where (feature='"
+			String query = "Update "+ (isUserDataTable?"userdataterms":"termdistribution")+" SET `A` = `A` + 1 Where (term='"
 					+ oldTerms.get(iterator) + "' ";
 			iterator++;
 			while (iterator % 950 != 0 && iterator < numOfTerms) {
-				query += " OR feature='" + oldTerms.get(iterator) + "'";
+				query += " OR term='" + oldTerms.get(iterator) + "'";
 				iterator++;
 			}
 			query += ") and classId=" + classId + ";";

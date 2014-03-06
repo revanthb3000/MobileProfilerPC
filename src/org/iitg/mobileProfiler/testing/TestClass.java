@@ -17,6 +17,8 @@ public class TestClass {
 		System.out.println(className);
 		className = UtilityFunctions.classifyUrl("http://nfl.com", false);
 		System.out.println(className);
+		className = UtilityFunctions.classifyUrl("https://code.google.com/p/sqlite-manager/issues/list", false);
+		System.out.println(className);
 //		UtilityFunctions.classifyExperimentalOutput("experimentalOutput.txt");
 //		UtilityFunctions.writeClassContentsToFile("classContents.txt", true);
 	}	

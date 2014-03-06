@@ -10,7 +10,7 @@ public class TermDistributionDao {
 	/**
 	 * Term we're referring to.
 	 */
-	private String feature;
+	private String term;
 	
 	/**
 	 * ClassId that is considered for this object
@@ -22,19 +22,19 @@ public class TermDistributionDao {
 	 */
 	private int A;
 	
-	public TermDistributionDao(String feature, int classId, int a) {
+	public TermDistributionDao(String term, int classId, int a) {
 		super();
-		this.feature = feature;
+		this.term = term;
 		this.classId = classId;
 		A = a;
 	}
 
-	public String getFeature() {
-		return feature;
+	public String getTerm() {
+		return term;
 	}
 
-	public void setFeature(String feature) {
-		this.feature = feature;
+	public void setTerm(String feature) {
+		this.term = feature;
 	}
 
 	public int getClassId() {
@@ -55,7 +55,7 @@ public class TermDistributionDao {
 
 	@Override
 	public String toString() {
-		return "TermDistributionDao [feature=" + feature + ", classId="
+		return "TermDistributionDao [term=" + term + ", classId="
 				+ classId + ", A=" + A + "]";
 	}
 
