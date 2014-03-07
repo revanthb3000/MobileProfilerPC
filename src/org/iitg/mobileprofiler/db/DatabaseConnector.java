@@ -477,10 +477,11 @@ public class DatabaseConnector {
 
 	/**
 	 * Queries the database and gets the total number of documents that have been classified till now.
+	 * @param isUserDataTable 
 	 * @return
 	 */
-	public int getTotalNumberOfDocuments() {
-		String query = "SELECT SUM(numberOfDocs) from classcontents;";
+	public int getTotalNumberOfDocuments(boolean isUserDataTable) {
+		String query = "SELECT SUM(numberOfDocs) from "+(isUserDataTable?"userdataclasscontents":"classcontents")+";";
 		int totalNumberOfDocs = 0;
 		try {
 			Statement statement = connection.createStatement();
@@ -749,9 +750,7 @@ public class DatabaseConnector {
 			}
 		}
 	}
-	
-	
-	
+		
 	/*************************************************************************
 	 * Methods that work on the activities table follow
 	 **************************************************************************/

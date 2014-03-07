@@ -60,8 +60,9 @@ public class Classifier {
 
 	public Classifier(DatabaseConnector inputDatabaseConnector) {
 		this.databaseConnector = inputDatabaseConnector;
-		this.totalNumberOfDocs = this.databaseConnector
-				.getTotalNumberOfDocuments();
+		int numberOfUserDocs = this.databaseConnector.getTotalNumberOfDocuments(true);
+		int numberOfDatasetDocs = this.databaseConnector.getTotalNumberOfDocuments(false);
+		this.totalNumberOfDocs = numberOfUserDocs + numberOfDatasetDocs;
 		this.numberOfClasses = this.databaseConnector.getNumberOfClasses();
 		this.classContents = this.databaseConnector.getNumberOfDocuments(0,
 				this.numberOfClasses, false);
