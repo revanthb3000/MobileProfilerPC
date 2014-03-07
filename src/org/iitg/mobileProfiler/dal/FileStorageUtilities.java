@@ -13,7 +13,7 @@ import java.util.Map.Entry;
 import org.ardverk.collection.PatriciaTrie;
 import org.ardverk.collection.StringKeyAnalyzer;
 import org.ardverk.collection.Trie;
-import org.iitg.mobileProfiler.core.FeatureDistribution;
+import org.iitg.mobileProfiler.preprocessing.FeatureDistribution;
 
 import com.google.gson.Gson;
 

@@ -1,4 +1,4 @@
-package org.iitg.mobileProfiler.core;
+package org.iitg.mobileProfiler.preprocessing;
 
 import java.util.ArrayList;
 import java.util.Collections;

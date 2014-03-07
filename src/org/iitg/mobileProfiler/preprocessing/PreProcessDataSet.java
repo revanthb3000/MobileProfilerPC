@@ -1,4 +1,4 @@
-package org.iitg.mobileProfiler.core;
+package org.iitg.mobileProfiler.preprocessing;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -14,7 +14,7 @@ import org.ardverk.collection.Trie;
 import org.iitg.mobileProfiler.dal.FileStorageUtilities;
 import org.iitg.mobileProfiler.dal.PostingList;
 
-public class PreProcessing {
+public class PreProcessDataSet {
 	
 	public static void getClassContentInfo() throws IOException{
 		File file = new File("trainingPages");
@@ -149,7 +149,7 @@ public class PreProcessing {
 	}
 
 	public static void constructFeatureDistribution(String fileName) throws IOException {
-		ArrayList<Integer> classContents = PreProcessing
+		ArrayList<Integer> classContents = PreProcessDataSet
 				.getClassContents("trainingPages");
 		int totalNumberOfDocs = 0;
 		for (int i = 0; i < classContents.size(); i++) {
@@ -184,7 +184,7 @@ public class PreProcessing {
 	}
 
 	public static void getGini(double giniThreshold,String fileName) throws IOException{
-		ArrayList<Integer> classContents = PreProcessing
+		ArrayList<Integer> classContents = PreProcessDataSet
 				.getClassContents("trainingPages");
 		int totalNumberOfDocs = 0;
 		for (int i = 0; i < classContents.size(); i++) {

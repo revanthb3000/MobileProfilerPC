@@ -1,4 +1,4 @@
-package org.iitg.mobileProfiler.core;
+package org.iitg.mobileProfiler.preprocessing;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,6 +11,7 @@ import java.util.Map;
 import org.ardverk.collection.Trie;
 import org.ardverk.collection.PatriciaTrie;
 import org.ardverk.collection.StringKeyAnalyzer;
+import org.iitg.mobileProfiler.core.TextParser;
 import org.iitg.mobileProfiler.dal.PostingList;
 
 public class ParseData {

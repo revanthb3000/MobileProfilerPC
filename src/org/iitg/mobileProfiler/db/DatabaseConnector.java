@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.iitg.mobileProfiler.core.FeatureDistribution;
 import org.iitg.mobileProfiler.dal.FileStorageUtilities;
+import org.iitg.mobileProfiler.preprocessing.FeatureDistribution;
 
 /**
  * This is the main class used to interact with the database.
