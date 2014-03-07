@@ -1,4 +1,4 @@
-package org.iitg.mobileProfiler.db;
+package org.iitg.mobileprofiler.db;
 
 public class ActivityDao {
 	

@@ -1,4 +1,4 @@
-package org.iitg.mobileProfiler.preprocessing;
+package org.iitg.mobileprofiler.preprocessing;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.iitg.mobileProfiler.dal.PostingList;
+import org.iitg.mobileprofiler.dal.PostingList;
 
 public class FeatureDistribution {
 

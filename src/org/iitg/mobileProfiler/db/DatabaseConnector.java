@@ -1,4 +1,4 @@
-package org.iitg.mobileProfiler.db;
+package org.iitg.mobileprofiler.db;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.iitg.mobileProfiler.dal.FileStorageUtilities;
-import org.iitg.mobileProfiler.preprocessing.FeatureDistribution;
+import org.iitg.mobileprofiler.dal.FileStorageUtilities;
+import org.iitg.mobileprofiler.preprocessing.FeatureDistribution;
 
 /**
  * This is the main class used to interact with the database.

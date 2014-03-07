@@ -1,11 +1,11 @@
-package org.iitg.mobileProfiler.core;
+package org.iitg.mobileprofiler.core;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.iitg.mobileProfiler.db.DatabaseConnector;
+import org.iitg.mobileprofiler.db.DatabaseConnector;
 import org.tartarus.porter.Stemmer;
 
 /**

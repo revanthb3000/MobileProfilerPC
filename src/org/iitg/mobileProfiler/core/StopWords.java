@@ -1,4 +1,4 @@
-package org.iitg.mobileProfiler.core;
+package org.iitg.mobileprofiler.core;
 
 import java.util.HashSet;
 

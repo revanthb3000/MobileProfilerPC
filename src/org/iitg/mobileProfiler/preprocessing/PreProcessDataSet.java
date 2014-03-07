@@ -1,4 +1,4 @@
-package org.iitg.mobileProfiler.preprocessing;
+package org.iitg.mobileprofiler.preprocessing;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.ardverk.collection.Trie;
-import org.iitg.mobileProfiler.dal.FileStorageUtilities;
-import org.iitg.mobileProfiler.dal.PostingList;
+import org.iitg.mobileprofiler.dal.FileStorageUtilities;
+import org.iitg.mobileprofiler.dal.PostingList;
 
 public class PreProcessDataSet {
 	

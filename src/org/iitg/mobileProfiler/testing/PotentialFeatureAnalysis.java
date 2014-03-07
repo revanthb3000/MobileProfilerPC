@@ -1,4 +1,4 @@
-package org.iitg.mobileProfiler.testing;
+package org.iitg.mobileprofiler.testing;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -7,8 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.iitg.mobileProfiler.core.TextParser;
-import org.iitg.mobileProfiler.db.DatabaseConnector;
+import org.iitg.mobileprofiler.db.DatabaseConnector;
+import org.iitg.mobileprofiler.core.TextParser;
 
 /**
  * This class is used to test the process of recomputing only potential features.

@@ -1,4 +1,4 @@
-package org.iitg.mobileProfiler.dal;
+package org.iitg.mobileprofiler.dal;
 
 import java.util.HashMap;
 import java.util.Map;

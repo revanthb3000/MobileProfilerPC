@@ -1,4 +1,4 @@
-package org.iitg.mobileProfiler.core;
+package org.iitg.mobileprofiler.core;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.iitg.mobileProfiler.db.DatabaseConnector;
-import org.iitg.mobileProfiler.db.TermDistributionDao;
+import org.iitg.mobileprofiler.db.DatabaseConnector;
+import org.iitg.mobileprofiler.db.TermDistributionDao;
 
 /**
  * This class does all work related to classification. Gini, Naive Bayes - all that stuff goes here.
