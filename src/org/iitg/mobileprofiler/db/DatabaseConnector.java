@@ -639,23 +639,23 @@ public class DatabaseConnector {
 	 * @param isUserDataTable 
 	 * @return
 	 */
-	public Boolean isTermPresentInClassDistribution(String term, int classId, boolean isUserDataTable) {
+	public Boolean isTermPresentInTermDistribution(String term, int classId, boolean isUserDataTable) {
 		String query = "SELECT * from "+(isUserDataTable?"userdataterms":"termdistribution")+" where term='" + term
 				+ "' and classId = " + classId + ";";
-		Boolean isTermPrsentInDataBase = false;
+		Boolean isTermPresent = false;
 		try {
 			Statement statement = connection.createStatement();
 			ResultSet resultSet;
 			resultSet = statement.executeQuery(query);
 			if (resultSet.next()) {
-				isTermPrsentInDataBase = true;
+				isTermPresent = true;
 			}
 		} catch (SQLException e) {
 			System.out.println("Exception Caught for query " + query + " \n"
 					+ e);
 			e.printStackTrace();
 		}
-		return isTermPrsentInDataBase;
+		return isTermPresent;
 	}
 
 	/**
@@ -683,7 +683,7 @@ public class DatabaseConnector {
 		ArrayList<String> oldTerms = new ArrayList<String>();
 		ArrayList<String> newTerms = new ArrayList<String>();
 		for (String term : tokens) {
-			if (!isTermPresentInClassDistribution(term, classId,isUserDataTable)) {
+			if (!isTermPresentInTermDistribution(term, classId,isUserDataTable)) {
 				newTerms.add(term);
 			} else {
 				oldTerms.add(term);
@@ -850,6 +850,9 @@ public class DatabaseConnector {
 	 * @param activityDaos
 	 */
 	public void updateActivities(ArrayList<ActivityDao> activityDaos) {
+		if(activityDaos.size()==0){
+			return;
+		}
 		String query = "UPDATE `activities` SET `assignedClass` = CASE activityId ";
 		String queryPartTwo = "";
 		for (ActivityDao activityDao : activityDaos) {
