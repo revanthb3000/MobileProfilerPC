@@ -46,7 +46,13 @@ public class ExperimentalOutputWorker {
 		int totalCount = 0;
 		int classifiedCount = 0;
 		for(String webPage : webPages){
-			String className = UtilityFunctions.classifyUrl(webPage, shouldMerge);
+			String className = "";
+			try{
+				className = UtilityFunctions.classifyUrl(webPage, shouldMerge);	
+			}
+			catch(Exception e){
+				continue;
+			}
 			totalCount++;
 			if(!className.trim().equals("")){
 				System.out.println("URL is : " + webPage);
