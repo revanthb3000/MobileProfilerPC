@@ -203,7 +203,7 @@ public class UtilityFunctions {
 		TextParser textParser = new TextParser();
 		Classifier classifier = new Classifier(databaseConnector);
 		
-		int classId = classifier.classifyDoc(textParser.tokenizeString(sourceCode, true));	//tokenize function eliminates words that are not feeatures. No worries there !
+		int classId = classifier.classifyDocClassic(textParser.tokenizeString(sourceCode, true));	//tokenize function eliminates words that are not feeatures. No worries there !
 		String className = "";
 		className = databaseConnector.getClassName(classId);
 		

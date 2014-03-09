@@ -192,6 +192,69 @@ public class Classifier {
 		}
 		return maxIndex;
 	}
+	
+	/**
+	 * This is the initial classification method we used.
+	 * @param tokens
+	 * @return
+	 */
+	public int classifyDocClassic(ArrayList<String> tokens) {
+		int numOfMatchedFeatures = 0;
+		ArrayList<Double> probabilities = new ArrayList<Double>();
+		Double temp = 0.0;
+		for (int i = 0; i < numberOfClasses; i++) {
+			temp = (1.0 * classContents.get(i))/* / totalNumberOfDocs */;
+			temp += (1.0 * userDataClassContents.get(i))/* / totalNumberOfDocs */;
+			probabilities.add(temp);
+		}
+
+		Map<String, Map<Integer, TermDistributionDao>> termDistributions = databaseConnector.getAllTokensDistribution(tokens, false);
+		Map<String, Map<Integer, TermDistributionDao>> userDataTermDistributions = databaseConnector.getAllTokensDistribution(tokens, true);
+		
+		ArrayList<Double> productProbabilities = new ArrayList<Double>();
+		for(int i=0;i<numberOfClasses;i++){
+			productProbabilities.add(-1.0);
+		}
+		for (String token : tokens) {
+			numOfMatchedFeatures++;
+			for (int i = 0; i < numberOfClasses; i++) {
+				int termDistA = 0;
+				if ((termDistributions.containsKey(token))&&(termDistributions.get(token).containsKey(i))) {
+					termDistA = termDistributions.get(token).get(i).getA();
+				}
+				if ((userDataTermDistributions.containsKey(token))&&(userDataTermDistributions.get(token).containsKey(i))) {
+					termDistA += userDataTermDistributions.get(token).get(i).getA();
+				}
+				temp = 1000 * ((1.0 * (1 + termDistA)) / ((classContents.get(i)+userDataClassContents.get(i)) + numberOfClasses));
+				if(productProbabilities.get(i)<0){
+					productProbabilities.set(i, temp);
+				}
+				else{
+					productProbabilities.set(i, temp*productProbabilities.get(i));
+				}
+			}
+		}
+		for(int i=0;i<numberOfClasses;i++){
+			temp = productProbabilities.get(i);
+			if(temp<0){
+				temp = 0.0;
+			}
+			probabilities.set(i, temp);
+		}
+		
+		if (numOfMatchedFeatures == 0) {
+			return -1;
+		}
+		int maxIndex = 0;
+		Double maximumValue = -1.0;
+		for (int i = 0; i < numberOfClasses; i++) {
+			if (probabilities.get(i) > maximumValue) {
+				maximumValue = probabilities.get(i);
+				maxIndex = i;
+			}
+		}
+		return maxIndex;
+	}
 
 	/**
 	 * This method is used to calculate the Chi-squared values given the values of A,B for a given classId.
