@@ -54,10 +54,10 @@ public class BootstrapPeer extends Peer {
 				info.put("sender", sender.getURL());
 				printJSONLog(info, log, false);
 			}
+			System.out.println("I got a message : " + peerMsg);
 
 			//add peer descriptor to list
 			if(peerMsg.get("type").equals(JoinMessage.MSG_PEER_JOIN)){
-				System.out.println("Got some message bitch !!!");
 
 				JSONObject params = peerMsg.getJSONObject("payload").getJSONObject("params");
 
@@ -84,9 +84,12 @@ public class BootstrapPeer extends Peer {
 
 
 					//send peer list to peer
-					if(newPLMsg!=null)
+					if(newPLMsg!=null){
 						//send(new Address(neighborPeer.getAddress()), newPLMsg);
-						send(neighborPeer, newPLMsg);
+						send(neighborPeer, newPLMsg);	
+						System.out.println(neighborPeer);
+						System.out.println(newPLMsg);
+					}
 					
 					if(nodeConfig.list_path!=null){
 
@@ -178,9 +181,6 @@ public class BootstrapPeer extends Peer {
 				}
 			}
 		}
-
-
-
 	}
 
 }
