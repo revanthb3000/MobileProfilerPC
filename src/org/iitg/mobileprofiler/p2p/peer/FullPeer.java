@@ -276,6 +276,7 @@ public class FullPeer extends Peer {
 			//send ping message to peer	
 			if(key!=null){
 				neighborPeer = peerList.get(key);
+				System.out.println(neighborPeer);
 				send(neighborPeer, newPingMsg);
 			}
 		}
@@ -289,114 +290,7 @@ public class FullPeer extends Peer {
 			System.out.println("no sbc address found");
 	}
 
-
 	public void disconnectGWP(){
 		closePublicAddress();
 	}
-
-	public static void main(String[] args) {
-
-		boolean active = true;
-		if(args.length!=0){
-			FullPeer peer = null;
-			if(args.length==3){
-				//args[0]=file peer configuration args[1]=key
-				peer = new FullPeer(args[0], args[1]);
-
-			}
-			else if(args.length==5){
-				//args[0]=file peer configuration args[1]=key args[2]=peer name args[3]=peer port
-				peer = new FullPeer(args[0], args[1], args[2], new Integer(args[3]));
-
-			}
-			for(int i=0; i<args.length; i++){
-				/*
-				 * join to bootstrapPeer
-				 */
-				if(args[i].equals("-j")){ 
-					peer.joinToBootstrapPeer();
-
-				}
-				/*
-				 * request public address from SBC
-				 */
-				else if(args[i].equals("-s")){
-					peer.contactSBC();
-				}
-				/*
-				 * join to bootstrapPeer, wait and send ping message to random peer
-				 */
-				else if(args[i].equals("-jp")){
-
-					peer.joinToBootstrapPeer();
-					//wait for 3 seconds
-					try {
-						Thread.sleep(3000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-
-					peer.pingToPeerRandomFromList();
-				}
-				/*
-				 * join to bootstrapPeer, wait and send ping message to random peer recursively
-				 */
-				else if(args[i].equals("-jr")){
-
-					peer.joinToBootstrapPeer();
-
-					while(active){
-
-						//wait for 15 seconds
-						try {
-							Thread.sleep(15000);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						//ping to random peer
-						peer.pingToPeerRandomFromList();
-					}
-				}
-
-				else if(args[i].equals("-p")){
-
-					peer.pingToPeer(args[5]);
-				}
-
-				else if(args[i].equals("-sd")){
-
-					peer.contactSBC();
-					try {
-						Thread.sleep(7000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					peer.disconnectGWP();
-
-				}
-				/*
-				 * contact SBC, wait, join to bootstrapPeer, wait and send ping message to random peer recursively
-				 */
-				else if(args[i].equals("-a")){
-					peer.contactSBC();
-					try {
-						Thread.sleep(4000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-
-					peer.joinToBootstrapPeer();
-
-					try {
-						Thread.sleep(3000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					peer.pingToPeerRandomFromList();
-				}
-			}
-		}
-	}
-
-
 }
