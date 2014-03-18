@@ -15,6 +15,7 @@ import java.util.Iterator;
 import org.iitg.mobileprofiler.p2p.msg.JoinMessage;
 import org.iitg.mobileprofiler.p2p.msg.PeerListMessage;
 import org.iitg.mobileprofiler.p2p.msg.PingMessage;
+import org.iitg.mobileprofiler.p2p.msg.TextMessage;
 import org.zoolu.tools.Log;
 
 /**
@@ -63,15 +64,10 @@ public class FullPeer extends Peer {
 	@Override
 	protected void onReceivedJSONMsg(JSONObject peerMsg, Address sender) {
 		try {
-
 			JSONObject params = peerMsg.getJSONObject("payload").getJSONObject("params");
-			/*
-			 * log - print info received message 
-			 */
 			if(nodeConfig.log_path!=null){
 				String typeMsg = peerMsg.get("type").toString();
 				int lengthMsg = peerMsg.toString().length();
-
 				JSONObject info = new JSONObject();
 				info.put("timestamp", System.currentTimeMillis());
 				info.put("type", "recv");
@@ -79,7 +75,6 @@ public class FullPeer extends Peer {
 				info.put("byte", lengthMsg);
 				info.put("sender", sender.getURL());
 				printJSONLog(info, log, false);
-
 			}
 
 			//add peer descriptor to list
@@ -102,16 +97,12 @@ public class FullPeer extends Peer {
 
 			}
 			if(peerMsg.get("type").equals(PeerListMessage.MSG_PEER_LIST)){
-
 				Iterator<String> iter = params.keys();
 
 				while(iter.hasNext()){
-
 					String key = (String) iter.next();
-
 					JSONObject keyPeer = params.getJSONObject(key);
 					PeerDescriptor neighborPeerDesc = new PeerDescriptor(keyPeer.get("name").toString(), keyPeer.get("address").toString(), keyPeer.get("key").toString());
-
 					if(keyPeer.get("contactAddress").toString()!="null")
 						neighborPeerDesc.setContactAddress(keyPeer.get("contactAddress").toString());
 
@@ -131,6 +122,10 @@ public class FullPeer extends Peer {
 
 				}
 
+			}
+			if(peerMsg.get("type").equals(TextMessage.MSG_TEXT)){
+				System.out.println("TextMessage Recieved");
+				System.out.println(peerMsg);
 			}
 
 		} catch (JSONException e) {
@@ -235,6 +230,11 @@ public class FullPeer extends Peer {
 			newJoinMsg.setNumPeerList(peerConfig.req_npeer);
 			send(new Address(peerConfig.bootstrap_peer), newJoinMsg);
 		}
+	}
+	
+	public void sendTextMessageToPeer(String toAddress, String message){
+		TextMessage textMessage = new TextMessage(peerDescriptor, message);
+		send(new Address(toAddress), textMessage);
 	}
 
 	public void pingToPeer(String address){

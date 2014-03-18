@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.Scanner;
 
 import org.iitg.mobileprofiler.p2p.msg.JoinMessage;
+import org.iitg.mobileprofiler.p2p.msg.TextMessage;
 
 /**
  * This is used to test the P2P classes
@@ -23,7 +24,7 @@ public class TestClass {
 
 	public static void main(String[] args) {
 		in = new Scanner(System.in);
-		System.out.print("What type of node ?\n1.Bootstrap Node.\n2.Simple Peer Node.\n3.Full Node.\nYour choice : ");
+		System.out.print("What type of node ?\n1.Bootstrap Node.\n2.Simple Peer Node.\n3.Full Peer.\nYour choice : ");
 
 		Integer userInput;
 		userInput = Integer.parseInt(in.nextLine());
@@ -60,10 +61,11 @@ public class TestClass {
 		String configFileName = in.nextLine().trim();
 		
 		String currentTime = "" + (new Date()).getTime();
-		System.out.println(currentTime);
 		FullPeer peer = new FullPeer("config/"+configFileName, getHexDigest(currentTime));
 		peer.joinToBootstrapPeer();
-		System.out.println(peer.getPeerList());
+		if(configFileName.equals("k.cfg")){
+			peer.sendTextMessageToPeer("172.16.27.15:5077", "This is a sample message");
+		}
 	}
 	
 	public static String getHexDigest(String inputString){

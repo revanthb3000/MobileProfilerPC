@@ -87,12 +87,11 @@ public class BootstrapPeer extends Peer {
 					if(newPLMsg!=null){
 						//send(new Address(neighborPeer.getAddress()), newPLMsg);
 						send(neighborPeer, newPLMsg);	
-						System.out.println(neighborPeer);
-						System.out.println(newPLMsg);
+//						System.out.println(neighborPeer);
+//						System.out.println(newPLMsg);
 					}
 					
 					if(nodeConfig.list_path!=null){
-
 						if(!fileHandler.isDirectoryExists(nodeConfig.list_path))
 							fileHandler.createDirectory(nodeConfig.list_path);
 						
