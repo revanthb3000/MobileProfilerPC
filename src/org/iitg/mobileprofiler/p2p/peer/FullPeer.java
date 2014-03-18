@@ -257,6 +257,7 @@ public class FullPeer extends Peer {
 		PingMessage newPingMsg = new PingMessage(peerDescriptor);
 		NeighborPeerDescriptor neighborPeer;
 		if(!peerList.isEmpty()){
+			System.out.println(peerList);
 			//get set size
 			int nKeys =  peerList.keySet().size();
 			//get a random number

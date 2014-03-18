@@ -67,6 +67,13 @@ public class TestClass {
 			Integer userInput = in.nextInt();
 			if(userInput==1){
 				peer.joinToBootstrapPeer();	
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println(peer.getPeerList());
 			}
 			else if(userInput==2){
 				Scanner scanner = new Scanner(System.in);
