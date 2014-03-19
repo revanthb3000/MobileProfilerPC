@@ -58,8 +58,6 @@ public class BootstrapPeer extends Peer {
 				info.put("sender", sender.getURL());
 				printJSONLog(info, log, false);
 			}
-			System.out.println("I got a message : " + peerMsg);
-
 
 			if(peerMsg.get("type").equals(JoinMessage.MSG_PEER_JOIN)){
 				JSONObject params = peerMsg.getJSONObject("payload").getJSONObject("params");

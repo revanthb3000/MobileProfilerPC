@@ -6,6 +6,7 @@ import it.unipr.ce.dsg.s2p.sip.Address;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -59,7 +60,7 @@ public class TestClass {
 		String configFileName = in.nextLine().trim();
 		
 		String currentTime = "" + (new Date()).getTime();
-		UserNodePeer peer = new UserNodePeer("config/"+configFileName, getHexDigest(currentTime));
+		UserNodePeer peer = new UserNodePeer("config/"+configFileName, getHexDigest(currentTime), getRandomClassDistribution());
 		
 		while(true){
 			System.out.print("What would you like to do ?\n1.Join the network.\n2.Get list of peers.\n3.Update peers list.\n4.Send a message to peer.\n5.Send ping to random peer.\nYour option : ");
@@ -83,7 +84,7 @@ public class TestClass {
 				
 				System.out.print("Where should I send it to ? ");
 				String toAddress = scanner.nextLine();
-				peer.sendTextMessageToPeer(toAddress, message);
+				peer.sendQuestionToPeer(toAddress, message);
 			}
 			else if(userInput==5){
 				peer.pingToPeerRandomFromList();
@@ -106,6 +107,16 @@ public class TestClass {
 			sb.append(Integer.toHexString((int) (b & 0xff)));
 		}
 		return sb.toString();
+	}
+	
+	public static ArrayList<Integer> getRandomClassDistribution(){
+		ArrayList<Integer> classDistribution = new ArrayList<Integer>();
+		for(int i=1;i<=229;i++){
+			//Get random number between 0 and 50
+			Integer randomInt = 50 + (int)(Math.random() * ((50 - 0) + 1));
+			classDistribution.add(randomInt);
+		}
+		return classDistribution;
 	}
 
 }

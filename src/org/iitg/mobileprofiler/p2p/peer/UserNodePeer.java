@@ -10,13 +10,14 @@ import it.unipr.ce.dsg.s2p.peer.PeerListManager;
 import it.unipr.ce.dsg.s2p.sip.Address;
 import it.unipr.ce.dsg.s2p.util.FileHandler;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.iitg.mobileprofiler.p2p.msg.JoinMessage;
 import org.iitg.mobileprofiler.p2p.msg.PeerListMessage;
 import org.iitg.mobileprofiler.p2p.msg.PeerListRequestMessage;
 import org.iitg.mobileprofiler.p2p.msg.PingMessage;
-import org.iitg.mobileprofiler.p2p.msg.TextMessage;
+import org.iitg.mobileprofiler.p2p.msg.UserQueryMessage;
 import org.zoolu.tools.Log;
 
 /**
@@ -31,10 +32,13 @@ public class UserNodePeer extends Peer {
 	private FileHandler fileHandler;
 
 	private Log log;
+	
+	private ArrayList<Integer> classContents;
 
-	public UserNodePeer(String pathConfig, String key) {
+	public UserNodePeer(String pathConfig, String key, ArrayList<Integer> userClassContents) {
 		super(pathConfig, key);
 		init(pathConfig);
+		classContents = userClassContents;
 	}
 
 	public UserNodePeer(String pathConfig, String key, String peerName, int peerPort) {
@@ -57,6 +61,10 @@ public class UserNodePeer extends Peer {
 	
 	public PeerListManager getPeerList(){
 		return peerList;
+	}
+	
+	public ArrayList<Integer> getClassContents() {
+		return classContents;
 	}
 
 	@Override
@@ -93,7 +101,7 @@ public class UserNodePeer extends Peer {
 					addNeighborPeer(neighborPeerDesc);
 				}
 			}
-			if(peerMsg.get("type").equals(TextMessage.MSG_TEXT)){
+			if(peerMsg.get("type").equals(UserQueryMessage.MSG_USER_QUERY)){
 				System.out.println("TextMessage Recieved");
 				System.out.println(peerMsg);
 			}
@@ -189,8 +197,6 @@ public class UserNodePeer extends Peer {
 
 	}
 
-
-
 	public void joinToBootstrapPeer(){
 		if(peerConfig.bootstrap_peer!=null){
 			JoinMessage newJoinMsg = new JoinMessage(peerDescriptor);
@@ -199,8 +205,8 @@ public class UserNodePeer extends Peer {
 		}
 	}
 	
-	public void sendTextMessageToPeer(String toAddress, String message){
-		TextMessage textMessage = new TextMessage(peerDescriptor, message);
+	public void sendQuestionToPeer(String toAddress, String message){
+		UserQueryMessage textMessage = new UserQueryMessage(peerDescriptor, message, classContents);
 		send(new Address(toAddress), textMessage);
 	}
 	
