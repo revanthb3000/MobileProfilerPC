@@ -1,6 +1,7 @@
 package org.iitg.mobileprofiler.p2p.peer;
 
 import it.unipr.ce.dsg.s2p.peer.PeerDescriptor;
+import it.unipr.ce.dsg.s2p.peer.PeerListManager;
 import it.unipr.ce.dsg.s2p.sip.Address;
 
 import java.security.MessageDigest;
@@ -22,7 +23,7 @@ public class TestClass {
 
 	public static void main(String[] args) {
 		in = new Scanner(System.in);
-		System.out.print("What type of node ?\n1.Bootstrap Node.\n2.Simple Peer Node.\n3.Full Peer.\nYour choice : ");
+		System.out.print("What type of node ?\n1.Bootstrap Node.\n2.UserNode Peer.\nYour choice : ");
 		
 		Integer userInput;
 		userInput = Integer.parseInt(in.nextLine());
@@ -30,8 +31,6 @@ public class TestClass {
 		if (userInput == 1) {
 			startBootstrapNode();
 		} else if (userInput == 2) {
-			startSimplePeerUserNode();
-		} else {
 			startFullPeerUserNode();
 		}
 	}
@@ -60,22 +59,24 @@ public class TestClass {
 		String configFileName = in.nextLine().trim();
 		
 		String currentTime = "" + (new Date()).getTime();
-		FullPeer peer = new FullPeer("config/"+configFileName, getHexDigest(currentTime));
+		UserNodePeer peer = new UserNodePeer("config/"+configFileName, getHexDigest(currentTime));
 		
 		while(true){
-			System.out.print("What would you like to do ?\n1.Join the network.\n2.Send a message to peer.\n3.Send ping to random peer.\nYour option : ");
+			System.out.print("What would you like to do ?\n1.Join the network.\n2.Get list of peers.\n3.Update peers list.\n4.Send a message to peer.\n5.Send ping to random peer.\nYour option : ");
 			Integer userInput = in.nextInt();
 			if(userInput==1){
 				peer.joinToBootstrapPeer();	
-				try {
-					Thread.sleep(5000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				System.out.println(peer.getPeerList());
 			}
-			else if(userInput==2){
+			else if (userInput==2){
+				PeerListManager peerList = peer.getPeerList();
+				for(String key : peerList.keySet()){
+					System.out.println(peerList.get(key));
+				}
+			}
+			else if (userInput==3){
+				peer.sendPeerListRequestMessage();
+			}
+			else if(userInput==4){
 				Scanner scanner = new Scanner(System.in);
 				System.out.print("What is your message ? ");
 				String message = scanner.nextLine();
@@ -84,7 +85,7 @@ public class TestClass {
 				String toAddress = scanner.nextLine();
 				peer.sendTextMessageToPeer(toAddress, message);
 			}
-			else if(userInput==3){
+			else if(userInput==5){
 				peer.pingToPeerRandomFromList();
 			}
 		}

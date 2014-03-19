@@ -11,6 +11,7 @@ import it.unipr.ce.dsg.s2p.util.FileHandler;
 
 import org.iitg.mobileprofiler.p2p.msg.JoinMessage;
 import org.iitg.mobileprofiler.p2p.msg.PeerListMessage;
+import org.iitg.mobileprofiler.p2p.msg.PeerListRequestMessage;
 import org.zoolu.tools.Log;
 
 /**
@@ -39,6 +40,9 @@ public class BootstrapPeer extends Peer {
 		}
 	}
 
+	/**
+	 * Our bootstrap will only receive two types of messages. The join message and the 'give me peer list' message.
+	 */
 	@Override
 	protected void onReceivedJSONMsg(JSONObject peerMsg, Address sender) {
 		try {
@@ -56,20 +60,16 @@ public class BootstrapPeer extends Peer {
 			}
 			System.out.println("I got a message : " + peerMsg);
 
-			//add peer descriptor to list
+
 			if(peerMsg.get("type").equals(JoinMessage.MSG_PEER_JOIN)){
-
 				JSONObject params = peerMsg.getJSONObject("payload").getJSONObject("params");
-
 				PeerDescriptor neighborPD = new PeerDescriptor(params.get("name").toString(), params.get("address").toString(), params.get("key").toString(), params.get("contactAddress").toString());
 				NeighborPeerDescriptor neighborPeer = addNeighborPeer(neighborPD);
-
+	
 				//check the numPeerList field
 				int numPeer = (Integer) peerMsg.get("numPeerList");
-
 				if(numPeer>=0){
 					PeerListMessage newPLMsg = null;
-
 					if(numPeer==0 || (this.peerList.size()<=numPeer)){
 						//create message and add the peer list 
 						newPLMsg = new PeerListMessage(this.peerList);	
@@ -77,18 +77,14 @@ public class BootstrapPeer extends Peer {
 					else{
 						newPLMsg = new PeerListMessage(this.peerList.getRandomPeers(numPeer+1));	
 					}
-
+	
 					//remove the current peer from payload
 					if(newPLMsg.getPayload().containsKey(params.get("key").toString()))
 						newPLMsg.getPayload().removeParam(params.get("key").toString());
-
-
+	
 					//send peer list to peer
 					if(newPLMsg!=null){
-						//send(new Address(neighborPeer.getAddress()), newPLMsg);
-						send(neighborPeer, newPLMsg);	
-//						System.out.println(neighborPeer);
-//						System.out.println(newPLMsg);
+						send(neighborPeer, newPLMsg);
 					}
 					
 					if(nodeConfig.list_path!=null){
@@ -96,9 +92,16 @@ public class BootstrapPeer extends Peer {
 							fileHandler.createDirectory(nodeConfig.list_path);
 						
 						peerList.writeList(fileHandler.openFileToWrite(nodeConfig.list_path+peerDescriptor.getAddress()+".json"));
-
 					}
 				}
+			}
+			else if(peerMsg.get("type").equals(PeerListRequestMessage.MSG_PEER_LIST_REQUEST)){
+				JSONObject params = peerMsg.getJSONObject("payload").getJSONObject("params");
+				System.out.println("Got a peer list request message from " + params.get("name").toString());
+				PeerListMessage newPLMsg = new PeerListMessage(this.peerList);
+				if(newPLMsg.getPayload().containsKey(params.get("key").toString()))
+					newPLMsg.getPayload().removeParam(params.get("key").toString());
+				send(new Address(params.get("address").toString()), newPLMsg);
 			}
 		} catch (JSONException e) {
 			throw new RuntimeException(e);

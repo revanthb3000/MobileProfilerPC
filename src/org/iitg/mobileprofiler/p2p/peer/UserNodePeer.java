@@ -14,19 +14,17 @@ import java.util.Iterator;
 
 import org.iitg.mobileprofiler.p2p.msg.JoinMessage;
 import org.iitg.mobileprofiler.p2p.msg.PeerListMessage;
+import org.iitg.mobileprofiler.p2p.msg.PeerListRequestMessage;
 import org.iitg.mobileprofiler.p2p.msg.PingMessage;
 import org.iitg.mobileprofiler.p2p.msg.TextMessage;
 import org.zoolu.tools.Log;
 
 /**
- * Class <code>FullPeer</code> implements many features of a peer.
- * FullPeer manages PEERLIST message and PING message. 
- * 
- * 
- * @author Fabrizio Caramia
+ * The UserNodePeer node that we'll use for user nodes.
+ * @author RB
  *
  */
-public class FullPeer extends Peer {
+public class UserNodePeer extends Peer {
 
 	protected PeerConfig peerConfig;
 
@@ -34,12 +32,12 @@ public class FullPeer extends Peer {
 
 	private Log log;
 
-	public FullPeer(String pathConfig, String key) {
+	public UserNodePeer(String pathConfig, String key) {
 		super(pathConfig, key);
 		init(pathConfig);
 	}
 
-	public FullPeer(String pathConfig, String key, String peerName, int peerPort) {
+	public UserNodePeer(String pathConfig, String key, String peerName, int peerPort) {
 		super(pathConfig, key, peerName, peerPort);
 		init(pathConfig);
 	}
@@ -79,22 +77,8 @@ public class FullPeer extends Peer {
 
 			//add peer descriptor to list
 			if(peerMsg.get("type").equals(PingMessage.MSG_PEER_PING)){
-
 				PeerDescriptor neighborPeerDesc = new PeerDescriptor(params.get("name").toString(), params.get("address").toString(), params.get("key").toString(), params.get("contactAddress").toString());
 				addNeighborPeer(neighborPeerDesc);
-
-				/*
-				 * peer list - write 
-				 */
-				if(nodeConfig.list_path!=null){
-
-					if(!fileHandler.isDirectoryExists(nodeConfig.list_path))
-						fileHandler.createDirectory(nodeConfig.list_path);
-
-					peerList.writeList(fileHandler.openFileToWrite(nodeConfig.list_path+peerDescriptor.getAddress()+".json"));
-
-				}
-
 			}
 			if(peerMsg.get("type").equals(PeerListMessage.MSG_PEER_LIST)){
 				Iterator<String> iter = params.keys();
@@ -107,27 +91,12 @@ public class FullPeer extends Peer {
 						neighborPeerDesc.setContactAddress(keyPeer.get("contactAddress").toString());
 
 					addNeighborPeer(neighborPeerDesc);
-
-					/*
-					 * peer list - write
-					 */
-					if(nodeConfig.list_path!=null){
-
-						if(!fileHandler.isDirectoryExists(nodeConfig.list_path))
-							fileHandler.createDirectory(nodeConfig.list_path);
-
-						peerList.writeList(fileHandler.openFileToWrite(nodeConfig.list_path+peerDescriptor.getAddress()+".json"));
-
-					}
-
 				}
-
 			}
 			if(peerMsg.get("type").equals(TextMessage.MSG_TEXT)){
 				System.out.println("TextMessage Recieved");
 				System.out.println(peerMsg);
 			}
-
 		} catch (JSONException e) {
 			throw new RuntimeException(e);
 		}
@@ -136,11 +105,9 @@ public class FullPeer extends Peer {
 
 	@Override
 	protected void onDeliveryMsgFailure(String peerMsg, Address receiver, String contentType) {
-
 		String typeMessage = null;
 		JSONObject jsonMsg = null;
 		long rtt = 0;
-		
 		if(contentType.equals(JSONParser.MSG_JSON)){
 			try {
 				jsonMsg = new JSONObject(peerMsg);
@@ -235,6 +202,13 @@ public class FullPeer extends Peer {
 	public void sendTextMessageToPeer(String toAddress, String message){
 		TextMessage textMessage = new TextMessage(peerDescriptor, message);
 		send(new Address(toAddress), textMessage);
+	}
+	
+	public void sendPeerListRequestMessage(){
+		if(peerConfig.bootstrap_peer!=null){
+			PeerListRequestMessage peerListRequestMessage = new PeerListRequestMessage(peerDescriptor);
+			send(new Address(peerConfig.bootstrap_peer), peerListRequestMessage);
+		}
 	}
 
 	public void pingToPeer(String address){
