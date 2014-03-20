@@ -102,7 +102,6 @@ public class UserNodePeer extends Peer {
 				}
 			}
 			if(peerMsg.get("type").equals(UserQueryMessage.MSG_USER_QUERY)){
-				System.out.println("TextMessage Recieved");
 				System.out.println(peerMsg);
 			}
 		} catch (JSONException e) {

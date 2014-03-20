@@ -1,8 +1,6 @@
 package org.iitg.mobileprofiler.p2p.peer;
 
-import it.unipr.ce.dsg.s2p.peer.PeerDescriptor;
 import it.unipr.ce.dsg.s2p.peer.PeerListManager;
-import it.unipr.ce.dsg.s2p.sip.Address;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -10,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 
-import org.iitg.mobileprofiler.p2p.msg.JoinMessage;
 
 /**
  * This is used to test the P2P classes
@@ -39,19 +36,6 @@ public class TestClass {
 	public static void startBootstrapNode() {
 		BootstrapPeer peer = new BootstrapPeer("config/bs.cfg",getHexDigest("bootstrap"));
 		System.out.println("BootStrap Node has started - " + peer.toString());
-	}
-
-	public static void startSimplePeerUserNode() {
-		in = new Scanner(System.in);
-		System.out.print("Config file name : ");
-		String configFileName = in.nextLine().trim();
-		
-		SimplePeer peer = new SimplePeer("config/" + configFileName);
-		System.out.println("Peer Descriptor: " + peer.getPeerDescriptor());
-		PeerDescriptor peerDesc = peer.getPeerDescriptor();
-		
-		JoinMessage joinMessage = new JoinMessage(peerDesc);
-		peer.send(new Address("172.16.27.15:5080"), joinMessage);
 	}
 	
 	public static void startFullPeerUserNode(){
@@ -92,6 +76,12 @@ public class TestClass {
 		}
 	}
 	
+	
+	/**
+	 * Utility function that generates the hexdigest for a given input string.
+	 * @param inputString
+	 * @return
+	 */
 	public static String getHexDigest(String inputString){
 		MessageDigest md = null;;
 		try {

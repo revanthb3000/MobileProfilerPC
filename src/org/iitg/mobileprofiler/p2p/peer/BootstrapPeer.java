@@ -95,7 +95,7 @@ public class BootstrapPeer extends Peer {
 			}
 			else if(peerMsg.get("type").equals(PeerListRequestMessage.MSG_PEER_LIST_REQUEST)){
 				JSONObject params = peerMsg.getJSONObject("payload").getJSONObject("params");
-				System.out.println("Got a peer list request message from " + params.get("name").toString());
+//				System.out.println("Got a peer list request message from " + params.get("name").toString());
 				PeerListMessage newPLMsg = new PeerListMessage(this.peerList);
 				if(newPLMsg.getPayload().containsKey(params.get("key").toString()))
 					newPLMsg.getPayload().removeParam(params.get("key").toString());
