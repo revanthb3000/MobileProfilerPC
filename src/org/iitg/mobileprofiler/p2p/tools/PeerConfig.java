@@ -1,4 +1,4 @@
-package org.iitg.mobileprofiler.p2p.peer;
+package org.iitg.mobileprofiler.p2p.tools;
 
 import org.zoolu.tools.Configure;
 import org.zoolu.tools.Parser;

@@ -1,13 +1,13 @@
-package org.iitg.mobileprofiler.p2p.peer;
+package org.iitg.mobileprofiler.p2p.tools;
 
+import it.unipr.ce.dsg.s2p.org.json.JSONException;
 import it.unipr.ce.dsg.s2p.peer.PeerListManager;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 
+import org.iitg.mobileprofiler.p2p.peer.BootstrapPeer;
+import org.iitg.mobileprofiler.p2p.peer.UserNodePeer;
 
 /**
  * This is used to test the P2P classes
@@ -19,7 +19,7 @@ public class TestClass {
 	
 	private static Scanner in = null;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws JSONException {
 		in = new Scanner(System.in);
 		System.out.print("What type of node ?\n1.Bootstrap Node.\n2.UserNode Peer.\nYour choice : ");
 		
@@ -34,7 +34,7 @@ public class TestClass {
 	}
 
 	public static void startBootstrapNode() {
-		BootstrapPeer peer = new BootstrapPeer("config/bs.cfg",getHexDigest("bootstrap"));
+		BootstrapPeer peer = new BootstrapPeer("config/bs.cfg",UtilityFunctions.getHexDigest("bootstrap"));
 		System.out.println("BootStrap Node has started - " + peer.toString());
 	}
 	
@@ -44,7 +44,7 @@ public class TestClass {
 		String configFileName = in.nextLine().trim();
 		
 		String currentTime = "" + (new Date()).getTime();
-		UserNodePeer peer = new UserNodePeer("config/"+configFileName, getHexDigest(currentTime), getRandomClassDistribution());
+		UserNodePeer peer = new UserNodePeer("config/"+configFileName, UtilityFunctions.getHexDigest(currentTime), UtilityFunctions.getRandomClassDistribution());
 		
 		while(true){
 			System.out.print("What would you like to do ?\n1.Join the network.\n2.Get list of peers.\n3.Update peers list.\n4.Send a message to peer.\n5.Send ping to random peer.\nYour option : ");
@@ -74,39 +74,6 @@ public class TestClass {
 				peer.pingToPeerRandomFromList();
 			}
 		}
-	}
-	
-	
-	/**
-	 * Utility function that generates the hexdigest for a given input string.
-	 * @param inputString
-	 * @return
-	 */
-	public static String getHexDigest(String inputString){
-		MessageDigest md = null;;
-		try {
-			md = MessageDigest.getInstance("MD5");
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			return "";
-		}
-		md.update(inputString.getBytes());
-		byte[] digest = md.digest();
-		StringBuffer sb = new StringBuffer();
-		for (byte b : digest) {
-			sb.append(Integer.toHexString((int) (b & 0xff)));
-		}
-		return sb.toString();
-	}
-	
-	public static ArrayList<Integer> getRandomClassDistribution(){
-		ArrayList<Integer> classDistribution = new ArrayList<Integer>();
-		for(int i=1;i<=229;i++){
-			//Get random number between 0 and 50
-			Integer randomInt = 50 + (int)(Math.random() * ((50 - 0) + 1));
-			classDistribution.add(randomInt);
-		}
-		return classDistribution;
 	}
 
 }

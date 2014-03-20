@@ -12,12 +12,16 @@ import it.unipr.ce.dsg.s2p.util.FileHandler;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Scanner;
 
 import org.iitg.mobileprofiler.p2p.msg.JoinMessage;
 import org.iitg.mobileprofiler.p2p.msg.PeerListMessage;
 import org.iitg.mobileprofiler.p2p.msg.PeerListRequestMessage;
 import org.iitg.mobileprofiler.p2p.msg.PingMessage;
+import org.iitg.mobileprofiler.p2p.msg.QueryReplyMessage;
 import org.iitg.mobileprofiler.p2p.msg.UserQueryMessage;
+import org.iitg.mobileprofiler.p2p.tools.PeerConfig;
+import org.iitg.mobileprofiler.p2p.tools.UtilityFunctions;
 import org.zoolu.tools.Log;
 
 /**
@@ -102,7 +106,25 @@ public class UserNodePeer extends Peer {
 				}
 			}
 			if(peerMsg.get("type").equals(UserQueryMessage.MSG_USER_QUERY)){
-				System.out.println(peerMsg);
+				String question = peerMsg.get("textMessage").toString();
+				String userName = params.get("name").toString();
+				String ipAddress = params.get("contactAddress").toString().split("@")[1];
+				ArrayList<Integer> questionClassDistribution = UtilityFunctions.getClassDistributionFromString(peerMsg.get("classDistribution").toString());
+				
+				System.out.println("Question from " + userName + ": " + question);
+				
+				int rating = 8;
+				
+				QueryReplyMessage queryReplyMessage = new QueryReplyMessage(peerDescriptor, question, UtilityFunctions.getSimilarityScore(questionClassDistribution, classContents), rating);
+				send(new Address(ipAddress), queryReplyMessage);
+			}
+			if(peerMsg.get("type").equals(QueryReplyMessage.MSG_QUERY_REPLY)){
+				System.out.println("Got a reply");
+				String question = peerMsg.get("question").toString();
+				String userName = params.get("name").toString();
+				System.out.println(userName + " answered : " + question);
+				System.out.println("Rating : " + peerMsg.get("answer"));
+				System.out.println("Similarity : " + peerMsg.get("similarity"));
 			}
 		} catch (JSONException e) {
 			throw new RuntimeException(e);
