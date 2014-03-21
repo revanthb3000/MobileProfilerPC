@@ -27,8 +27,14 @@ import org.iitg.mobileprofiler.p2p.tools.UtilityFunctions;
  */
 public class UserNodePeer extends Peer {
 	
+	/**
+	 * Class contents of the given user
+	 */
 	private ArrayList<Integer> classContents;
 	
+	/**
+	 * Bootsta
+	 */
 	private String bootstrapAddress;
 	
 	/**
