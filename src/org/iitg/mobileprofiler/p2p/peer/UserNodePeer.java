@@ -8,11 +8,9 @@ import it.unipr.ce.dsg.s2p.peer.Peer;
 import it.unipr.ce.dsg.s2p.peer.PeerDescriptor;
 import it.unipr.ce.dsg.s2p.peer.PeerListManager;
 import it.unipr.ce.dsg.s2p.sip.Address;
-import it.unipr.ce.dsg.s2p.util.FileHandler;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Scanner;
 
 import org.iitg.mobileprofiler.p2p.msg.JoinMessage;
 import org.iitg.mobileprofiler.p2p.msg.PeerListMessage;
@@ -20,9 +18,7 @@ import org.iitg.mobileprofiler.p2p.msg.PeerListRequestMessage;
 import org.iitg.mobileprofiler.p2p.msg.PingMessage;
 import org.iitg.mobileprofiler.p2p.msg.QueryReplyMessage;
 import org.iitg.mobileprofiler.p2p.msg.UserQueryMessage;
-import org.iitg.mobileprofiler.p2p.tools.PeerConfig;
 import org.iitg.mobileprofiler.p2p.tools.UtilityFunctions;
-import org.zoolu.tools.Log;
 
 /**
  * The UserNodePeer node that we'll use for user nodes.
@@ -30,38 +26,23 @@ import org.zoolu.tools.Log;
  *
  */
 public class UserNodePeer extends Peer {
-
-	protected PeerConfig peerConfig;
-
-	private FileHandler fileHandler;
-
-	private Log log;
 	
 	private ArrayList<Integer> classContents;
-
-	public UserNodePeer(String pathConfig, String key, ArrayList<Integer> userClassContents) {
-		super(pathConfig, key);
-		init(pathConfig);
+	
+	private String bootstrapAddress;
+	
+	/**
+	 * This is the number of peers to which you wish to connect to (max)
+	 * 0 - infinite.
+	 */
+	private int numberOfPeers;
+	
+	public UserNodePeer(String key, String peerName, int peerPort, ArrayList<Integer> userClassContents, String bootstrapInfo, int numOfPeers){
+		super(null, key, peerName, peerPort);
 		classContents = userClassContents;
+		bootstrapAddress = bootstrapInfo;
+		numberOfPeers = numOfPeers;
 	}
-
-	public UserNodePeer(String pathConfig, String key, String peerName, int peerPort) {
-		super(pathConfig, key, peerName, peerPort);
-		init(pathConfig);
-	}
-
-	private void init(String pathConfig){
-		this.peerConfig = new PeerConfig(pathConfig);
-		fileHandler = new FileHandler();
-
-		if(nodeConfig.log_path!=null){
-			if(!fileHandler.isDirectoryExists(nodeConfig.log_path))
-				fileHandler.createDirectory(nodeConfig.log_path);
-
-			log = new Log(nodeConfig.log_path+"info_"+peerDescriptor.getAddress()+".log", Log.LEVEL_MEDIUM); 
-		}
-	}
-
 	
 	public PeerListManager getPeerList(){
 		return peerList;
@@ -75,6 +56,8 @@ public class UserNodePeer extends Peer {
 	protected void onReceivedJSONMsg(JSONObject peerMsg, Address sender) {
 		try {
 			JSONObject params = peerMsg.getJSONObject("payload").getJSONObject("params");
+			
+			//Useful for logging
 			if(nodeConfig.log_path!=null){
 				String typeMsg = peerMsg.get("type").toString();
 				int lengthMsg = peerMsg.toString().length();
@@ -84,7 +67,6 @@ public class UserNodePeer extends Peer {
 				info.put("typeMessage", typeMsg);
 				info.put("byte", lengthMsg);
 				info.put("sender", sender.getURL());
-				printJSONLog(info, log, false);
 			}
 
 			//add peer descriptor to list
@@ -93,6 +75,7 @@ public class UserNodePeer extends Peer {
 				addNeighborPeer(neighborPeerDesc);
 			}
 			if(peerMsg.get("type").equals(PeerListMessage.MSG_PEER_LIST)){
+				@SuppressWarnings("unchecked")
 				Iterator<String> iter = params.keys();
 
 				while(iter.hasNext()){
@@ -150,11 +133,8 @@ public class UserNodePeer extends Peer {
 				e.printStackTrace();
 			}
 
-			/*
-			 *log - print info sent message 
-			 */
+			//Useful for logging
 			if(nodeConfig.log_path!=null){
-
 				try {
 					JSONObject info = new JSONObject();
 					info.put("timestamp", System.currentTimeMillis());
@@ -164,7 +144,6 @@ public class UserNodePeer extends Peer {
 					info.put("receiver", receiver.getURL());
 					info.put("RTT", rtt);
 					info.put("byte", peerMsg.length());
-					printJSONLog(info, log, false);
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
@@ -194,9 +173,7 @@ public class UserNodePeer extends Peer {
 				e.printStackTrace();
 			}
 
-			/*
-			 *log - print info sent message 
-			 */
+			//Useful for logging
 			if(nodeConfig.log_path!=null){
 
 				try {
@@ -208,7 +185,6 @@ public class UserNodePeer extends Peer {
 					info.put("receiver", receiver.getURL());
 					info.put("RTT", rtt);
 					info.put("byte", peerMsg.length());
-					printJSONLog(info, log, false);
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
@@ -219,10 +195,10 @@ public class UserNodePeer extends Peer {
 	}
 
 	public void joinToBootstrapPeer(){
-		if(peerConfig.bootstrap_peer!=null){
+		if(bootstrapAddress!=null){
 			JoinMessage newJoinMsg = new JoinMessage(peerDescriptor);
-			newJoinMsg.setNumPeerList(peerConfig.req_npeer);
-			send(new Address(peerConfig.bootstrap_peer), newJoinMsg);
+			newJoinMsg.setNumPeerList(numberOfPeers);
+			send(new Address(bootstrapAddress), newJoinMsg);
 		}
 	}
 	
@@ -232,9 +208,9 @@ public class UserNodePeer extends Peer {
 	}
 	
 	public void sendPeerListRequestMessage(){
-		if(peerConfig.bootstrap_peer!=null){
+		if(bootstrapAddress!=null){
 			PeerListRequestMessage peerListRequestMessage = new PeerListRequestMessage(peerDescriptor);
-			send(new Address(peerConfig.bootstrap_peer), peerListRequestMessage);
+			send(new Address(bootstrapAddress), peerListRequestMessage);
 		}
 	}
 

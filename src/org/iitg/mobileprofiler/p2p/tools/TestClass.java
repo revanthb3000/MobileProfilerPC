@@ -18,6 +18,10 @@ import org.iitg.mobileprofiler.p2p.peer.UserNodePeer;
 public class TestClass {
 	
 	private static Scanner in = null;
+	
+	private static String ipAddress = "172.16.27.15";
+	
+	private static int boostrapPort = 5080;
 
 	public static void main(String[] args) throws JSONException {
 		in = new Scanner(System.in);
@@ -34,17 +38,22 @@ public class TestClass {
 	}
 
 	public static void startBootstrapNode() {
-		BootstrapPeer peer = new BootstrapPeer("config/bs.cfg",UtilityFunctions.getHexDigest("bootstrap"));
+		BootstrapPeer peer = new BootstrapPeer(UtilityFunctions.getHexDigest("bootstrap"),"bootstrap",boostrapPort);
 		System.out.println("BootStrap Node has started - " + peer.toString());
 	}
 	
 	public static void startFullPeerUserNode(){
 		in = new Scanner(System.in);
-		System.out.print("Config file name : ");
-		String configFileName = in.nextLine().trim();
+		System.out.print("Peer Name and port : ");
+		String peerName = in.nextLine().trim();
+		int portNumber = Integer.parseInt(peerName.split(":")[1]);
+		peerName = peerName.split(":")[0];
 		
 		String currentTime = "" + (new Date()).getTime();
-		UserNodePeer peer = new UserNodePeer("config/"+configFileName, UtilityFunctions.getHexDigest(currentTime), UtilityFunctions.getRandomClassDistribution());
+		UserNodePeer peer = new UserNodePeer(UtilityFunctions.getHexDigest(currentTime), 
+											 peerName, portNumber, 
+											 UtilityFunctions.getRandomClassDistribution(), 
+											 ipAddress + ":" + boostrapPort, 0);
 		
 		while(true){
 			System.out.print("What would you like to do ?\n1.Join the network.\n2.Get list of peers.\n3.Update peers list.\n4.Send a message to peer.\n5.Send ping to random peer.\nYour option : ");

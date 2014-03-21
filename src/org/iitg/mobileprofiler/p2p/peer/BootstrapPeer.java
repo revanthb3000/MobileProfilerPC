@@ -7,12 +7,10 @@ import it.unipr.ce.dsg.s2p.peer.NeighborPeerDescriptor;
 import it.unipr.ce.dsg.s2p.peer.Peer;
 import it.unipr.ce.dsg.s2p.peer.PeerDescriptor;
 import it.unipr.ce.dsg.s2p.sip.Address;
-import it.unipr.ce.dsg.s2p.util.FileHandler;
 
 import org.iitg.mobileprofiler.p2p.msg.JoinMessage;
 import org.iitg.mobileprofiler.p2p.msg.PeerListMessage;
 import org.iitg.mobileprofiler.p2p.msg.PeerListRequestMessage;
-import org.zoolu.tools.Log;
 
 /**
  * This is the BootStrap peer that is your one stop shop for nodes info.
@@ -21,23 +19,8 @@ import org.zoolu.tools.Log;
  */
 public class BootstrapPeer extends Peer {
 
-	private Log log;
-	private FileHandler fileHandler;
-
-	public BootstrapPeer(String pathConfig, String key) {
-		super(pathConfig, key);
-		init();
-	}
-
-	private void init(){
-
-		if(nodeConfig.log_path!=null){
-			fileHandler = new FileHandler();
-			if(!fileHandler.isDirectoryExists(nodeConfig.log_path)){
-				fileHandler.createDirectory(nodeConfig.log_path);
-			}
-			log = new Log(nodeConfig.log_path+"info_"+peerDescriptor.getAddress()+".log", Log.LEVEL_MEDIUM);
-		}
+	public BootstrapPeer(String key, String peerName, int peerPort) {
+		super(null, key, peerName, peerPort);
 	}
 
 	/**
@@ -46,18 +29,17 @@ public class BootstrapPeer extends Peer {
 	@Override
 	protected void onReceivedJSONMsg(JSONObject peerMsg, Address sender) {
 		try {
-			if(nodeConfig.log_path!=null){
-				String typeMsg = peerMsg.get("type").toString();
-				int lengthMsg = peerMsg.toString().length();
+			
+			//Useful for logging
+			String typeMsg = peerMsg.get("type").toString();
+			int lengthMsg = peerMsg.toString().length();
 
-				JSONObject info = new JSONObject();
-				info.put("timestamp", System.currentTimeMillis());
-				info.put("type", "recv");
-				info.put("typeMessage", typeMsg);
-				info.put("byte", lengthMsg);
-				info.put("sender", sender.getURL());
-				printJSONLog(info, log, false);
-			}
+			JSONObject info = new JSONObject();
+			info.put("timestamp", System.currentTimeMillis());
+			info.put("type", "recv");
+			info.put("typeMessage", typeMsg);
+			info.put("byte", lengthMsg);
+			info.put("sender", sender.getURL());
 
 			if(peerMsg.get("type").equals(JoinMessage.MSG_PEER_JOIN)){
 				JSONObject params = peerMsg.getJSONObject("payload").getJSONObject("params");
@@ -85,12 +67,6 @@ public class BootstrapPeer extends Peer {
 						send(neighborPeer, newPLMsg);
 					}
 					
-					if(nodeConfig.list_path!=null){
-						if(!fileHandler.isDirectoryExists(nodeConfig.list_path))
-							fileHandler.createDirectory(nodeConfig.list_path);
-						
-						peerList.writeList(fileHandler.openFileToWrite(nodeConfig.list_path+peerDescriptor.getAddress()+".json"));
-					}
 				}
 			}
 			else if(peerMsg.get("type").equals(PeerListRequestMessage.MSG_PEER_LIST_REQUEST)){
@@ -101,6 +77,7 @@ public class BootstrapPeer extends Peer {
 					newPLMsg.getPayload().removeParam(params.get("key").toString());
 				send(new Address(params.get("address").toString()), newPLMsg);
 			}
+			
 		} catch (JSONException e) {
 			throw new RuntimeException(e);
 		}
@@ -124,21 +101,20 @@ public class BootstrapPeer extends Peer {
 				e.printStackTrace();
 			}
 
-			if(nodeConfig.log_path!=null){
-				try {
-					JSONObject info = new JSONObject();
-					info.put("timestamp", System.currentTimeMillis());
-					info.put("type", "sent");
-					info.put("typeMessage", typeMessage);
-					info.put("transaction", "failed");
-					info.put("receiver", receiver.getURL());
-					info.put("RTT", rtt);
-					info.put("byte", peerMsg.length());
-					printJSONLog(info, log, false);
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
+			//Useful for logging
+			try {
+				JSONObject info = new JSONObject();
+				info.put("timestamp", System.currentTimeMillis());
+				info.put("type", "sent");
+				info.put("typeMessage", typeMessage);
+				info.put("transaction", "failed");
+				info.put("receiver", receiver.getURL());
+				info.put("RTT", rtt);
+				info.put("byte", peerMsg.length());
+			} catch (JSONException e) {
+				e.printStackTrace();
 			}
+			
 		}
 	}
 
@@ -161,25 +137,22 @@ public class BootstrapPeer extends Peer {
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-			/*
-			 *log - print info sent message 
-			 */
-			if(nodeConfig.log_path!=null){
 
-				try {
-					JSONObject info = new JSONObject();
-					info.put("timestamp", System.currentTimeMillis());
-					info.put("type", "sent");
-					info.put("typeMessage", typeMessage);
-					info.put("transaction", "successful");
-					info.put("receiver", receiver.getURL());
-					info.put("RTT", rtt);
-					info.put("byte", peerMsg.length());
-					printJSONLog(info, log, false);
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
+
+			//Useful for logging
+			try {
+				JSONObject info = new JSONObject();
+				info.put("timestamp", System.currentTimeMillis());
+				info.put("type", "sent");
+				info.put("typeMessage", typeMessage);
+				info.put("transaction", "successful");
+				info.put("receiver", receiver.getURL());
+				info.put("RTT", rtt);
+				info.put("byte", peerMsg.length());
+			} catch (JSONException e) {
+				e.printStackTrace();
 			}
+			
 		}
 	}
 
