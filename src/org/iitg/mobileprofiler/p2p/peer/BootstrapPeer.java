@@ -28,6 +28,7 @@ public class BootstrapPeer extends Peer {
 	 */
 	@Override
 	protected void onReceivedJSONMsg(JSONObject peerMsg, Address sender) {
+		System.out.println(peerMsg);
 		try {
 			
 			//Useful for logging
