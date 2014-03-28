@@ -33,7 +33,7 @@ public class UserNodePeer extends Peer {
 	private ArrayList<Integer> classContents;
 	
 	/**
-	 * Bootsta
+	 * Bootstrap Address
 	 */
 	private String bootstrapAddress;
 	
@@ -43,11 +43,12 @@ public class UserNodePeer extends Peer {
 	 */
 	private int numberOfPeers;
 	
-	public UserNodePeer(String key, String peerName, int peerPort, ArrayList<Integer> userClassContents, String bootstrapInfo, int numOfPeers){
+	public UserNodePeer(String key, String peerName, int peerPort, ArrayList<Integer> userClassContents, String bootstrapInfo, String SBCAddress, int numOfPeers){
 		super(null, key, peerName, peerPort);
 		classContents = userClassContents;
 		bootstrapAddress = bootstrapInfo;
 		numberOfPeers = numOfPeers;
+		nodeConfig.sbc = SBCAddress;
 	}
 	
 	public PeerListManager getPeerList(){
