@@ -15,17 +15,19 @@ import org.iitg.mobileprofiler.dal.FileStorageUtilities;
 import org.iitg.mobileprofiler.preprocessing.FeatureDistribution;
 
 /**
- * This is the main class used to interact with the database.
- * A class with several methods in it. Contains methods for all database queries that will be used.
+ * This is the main class used to interact with the database. A class with
+ * several methods in it. Contains methods for all database queries that will be
+ * used.
+ * 
  * @author RB
- *
+ * 
  */
 public class DatabaseConnector {
 
 	private static final String DATABASE_FILE_NAME = "mobileclassifier.db";
 
 	private Connection connection;
-	
+
 	/**
 	 * Basic constructor. Opens a database connection.
 	 */
@@ -56,7 +58,8 @@ public class DatabaseConnector {
 	}
 
 	/**
-	 * Does what it says. Calling this function is crucial. Don't want any open connections lingering around !
+	 * Does what it says. Calling this function is crucial. Don't want any open
+	 * connections lingering around !
 	 */
 	public void closeDBConnection() {
 		try {
@@ -96,11 +99,11 @@ public class DatabaseConnector {
 			statement.executeUpdate(query);
 
 			// THIS WON'T SUFFICE. OPEN THE SQLITE FILE AND SET activitiesId to
-			// INTEGER PRIMARY KEY
+			// INTEGER PRIMARY KEY. This is for the AUTO_INCREMENT thing.
 			query = "CREATE TABLE IF NOT EXISTS `activities` "
 					+ "(`activityId` int(11) NOT NULL,`activityType` varchar(255) NOT NULL,"
 					+ "`activityInfo` text NOT NULL,"
-					+ "`timeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+					+ "`timeStamp` timestamp NOT NULL DEFAULT CURRENT_TIM8ESTAMP,"
 					+ "`assignedClass` varchar(255) NOT NULL,PRIMARY KEY (`activityId`))";
 			statement.executeUpdate(query);
 
@@ -109,12 +112,30 @@ public class DatabaseConnector {
 					+ "`A` int(11) NOT NULL,"
 					+ "PRIMARY KEY (`term`,`classId`));";
 			statement.executeUpdate(query);
-			
+
 			query = "CREATE TABLE IF NOT EXISTS `userdataclasscontents` "
 					+ "(`classId` int(11) NOT NULL,`numberOfDocs` "
 					+ "int(11) NOT NULL,PRIMARY KEY (`classId`));";
 			statement.executeUpdate(query);
-			
+
+			// THIS WON'T SUFFICE. OPEN THE SQLITE FILE AND SET questionId to
+			// INTEGER PRIMARY KEY. This is for the AUTO_INCREMENT thing.
+			query = "CREATE TABLE IF NOT EXISTS `questionmessages` "
+					+ "(`questionId` int(11) NOT NULL,"
+					+ "`question` varchar(255) NOT NULL,"
+					+ " PRIMARY KEY (`questionId`))";
+			statement.executeUpdate(query);
+
+			// THIS WON'T SUFFICE. OPEN THE SQLITE FILE AND SET answerId to
+			// INTEGER PRIMARY KEY. This is for the AUTO_INCREMENT thing.
+			query = "CREATE TABLE IF NOT EXISTS `answermessages` "
+					+ "(`answerId` int(11) NOT NULL,"
+					+ "`questionId` int(11) NOT NULL,"
+					+ "`answer` int(11) NOT NULL,"
+					+ "`similarity` real NOT NULL,"
+					+ " PRIMARY KEY (`answerId`))";
+			statement.executeUpdate(query);
+
 		} catch (SQLException e) {
 			System.out.println("Exception Caught for query " + query + " \n"
 					+ e);
@@ -123,7 +144,9 @@ public class DatabaseConnector {
 	}
 
 	/**
-	 * Fill the classContents table with the class distribution of the training dataset.
+	 * Fill the classContents table with the class distribution of the training
+	 * dataset.
+	 * 
 	 * @throws IOException
 	 */
 	public void fillClassContents() throws IOException {
@@ -144,11 +167,12 @@ public class DatabaseConnector {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
-	 * Basically fills the userDataClassContents table with initial mappings. Everything is set to zero.
+	 * Basically fills the userDataClassContents table with initial mappings.
+	 * Everything is set to zero.
 	 */
-	public void fillUserDataClassContents(){
+	public void fillUserDataClassContents() {
 		String query = "";
 		try {
 			Statement statement = connection.createStatement();
@@ -166,7 +190,9 @@ public class DatabaseConnector {
 	}
 
 	/**
-	 * Fills the mapping tables with values from 1 to 237 along with the respective class names.
+	 * Fills the mapping tables with values from 1 to 237 along with the
+	 * respective class names.
+	 * 
 	 * @throws IOException
 	 */
 	public void fillClassMappings() throws IOException {
@@ -189,7 +215,9 @@ public class DatabaseConnector {
 	}
 
 	/**
-	 * Takes the training dataset index table and fills this table using that data.
+	 * Takes the training dataset index table and fills this table using that
+	 * data.
+	 * 
 	 * @throws IOException
 	 */
 	public void fillTermDistribution() throws IOException {
@@ -230,6 +258,7 @@ public class DatabaseConnector {
 
 	/**
 	 * Initial set of features with gini = 0.95
+	 * 
 	 * @throws IOException
 	 */
 	public void fillFeaturesList() throws IOException {
@@ -258,15 +287,19 @@ public class DatabaseConnector {
 	}
 
 	/**
-	 * Given a word and classId, this function will return a TermDistributionDao object which will also contain the 'A' value.
+	 * Given a word and classId, this function will return a TermDistributionDao
+	 * object which will also contain the 'A' value.
+	 * 
 	 * @param term
 	 * @param classId
-	 * @param isUserDataTable 
+	 * @param isUserDataTable
 	 * @return
 	 */
-	public TermDistributionDao getTermDistribution(String term, int classId, boolean isUserDataTable) {
-		String query = "SELECT * from "+ (isUserDataTable?"userdataterms":"termdistribution")+" where term='" + term
-				+ "' AND classId=" + classId + ";";
+	public TermDistributionDao getTermDistribution(String term, int classId,
+			boolean isUserDataTable) {
+		String query = "SELECT * from "
+				+ (isUserDataTable ? "userdataterms" : "termdistribution")
+				+ " where term='" + term + "' AND classId=" + classId + ";";
 
 		TermDistributionDao termDistributionDao = null;
 		try {
@@ -286,14 +319,19 @@ public class DatabaseConnector {
 	}
 
 	/**
-	 * Given a term, this function will return a Map between classId and termDistributionDao objects. Useful function if you need the distribution of a term across all classes.
+	 * Given a term, this function will return a Map between classId and
+	 * termDistributionDao objects. Useful function if you need the distribution
+	 * of a term across all classes.
+	 * 
 	 * @param term
-	 * @param isUserDataTable 
+	 * @param isUserDataTable
 	 * @return
 	 */
-	public Map<Integer, TermDistributionDao> getAllTermDistribution(String term, boolean isUserDataTable) {
-		String query = "SELECT * from "+ (isUserDataTable?"userdataterms":"termdistribution")+" where term='" + term
-				+ "';";
+	public Map<Integer, TermDistributionDao> getAllTermDistribution(
+			String term, boolean isUserDataTable) {
+		String query = "SELECT * from "
+				+ (isUserDataTable ? "userdataterms" : "termdistribution")
+				+ " where term='" + term + "';";
 
 		Map<Integer, TermDistributionDao> termDistributionDaos = new HashMap<Integer, TermDistributionDao>();
 		try {
@@ -316,9 +354,12 @@ public class DatabaseConnector {
 	}
 
 	/**
-	 * Similar to the previous function. Given a set of tokens, a Map is returned that will contain info of the termDistribution of each term present in the ArrayList.
+	 * Similar to the previous function. Given a set of tokens, a Map is
+	 * returned that will contain info of the termDistribution of each term
+	 * present in the ArrayList.
+	 * 
 	 * @param tokens
-	 * @param isUserDataTable 
+	 * @param isUserDataTable
 	 * @return
 	 */
 	public Map<String, Map<Integer, TermDistributionDao>> getAllTokensDistribution(
@@ -327,8 +368,9 @@ public class DatabaseConnector {
 			return null;
 		}
 		String term = tokens.get(0), previousTerm = tokens.get(0);
-		String query = "SELECT * from "+ (isUserDataTable?"userdataterms":"termdistribution")+" where term='" + term
-				+ "'";
+		String query = "SELECT * from "
+				+ (isUserDataTable ? "userdataterms" : "termdistribution")
+				+ " where term='" + term + "'";
 		for (int i = 1; i < tokens.size(); i++) {
 			term = tokens.get(i);
 			if (term.equals(previousTerm)) {
@@ -370,7 +412,9 @@ public class DatabaseConnector {
 	}
 
 	/**
-	 * Given a set of words, this function returns all those terms that are a part of our feature set.
+	 * Given a set of words, this function returns all those terms that are a
+	 * part of our feature set.
+	 * 
 	 * @param tokens
 	 * @return
 	 */
@@ -408,6 +452,7 @@ public class DatabaseConnector {
 
 	/**
 	 * Returns a list of all the features used by the classifier.
+	 * 
 	 * @return
 	 */
 	public ArrayList<String> getAllFeaturesList() {
@@ -431,6 +476,7 @@ public class DatabaseConnector {
 
 	/**
 	 * Tells if a given term is a feature or not.
+	 * 
 	 * @param term
 	 * @return
 	 */
@@ -455,6 +501,7 @@ public class DatabaseConnector {
 
 	/**
 	 * Queries the database and gets the total number of classes used.
+	 * 
 	 * @return
 	 */
 	public int getNumberOfClasses() {
@@ -476,12 +523,16 @@ public class DatabaseConnector {
 	}
 
 	/**
-	 * Queries the database and gets the total number of documents that have been classified till now.
-	 * @param isUserDataTable 
+	 * Queries the database and gets the total number of documents that have
+	 * been classified till now.
+	 * 
+	 * @param isUserDataTable
 	 * @return
 	 */
 	public int getTotalNumberOfDocuments(boolean isUserDataTable) {
-		String query = "SELECT SUM(numberOfDocs) from "+(isUserDataTable?"userdataclasscontents":"classcontents")+";";
+		String query = "SELECT SUM(numberOfDocs) from "
+				+ (isUserDataTable ? "userdataclasscontents" : "classcontents")
+				+ ";";
 		int totalNumberOfDocs = 0;
 		try {
 			Statement statement = connection.createStatement();
@@ -500,14 +551,18 @@ public class DatabaseConnector {
 
 	/**
 	 * Returns the number of docs. that belong the classIds between two numbers.
+	 * 
 	 * @param startingClassId
 	 * @param endingClassId
-	 * @param isUserDataTable 
+	 * @param isUserDataTable
 	 * @return
 	 */
-	public ArrayList<Integer> getNumberOfDocuments(int startingClassId, int endingClassId, boolean isUserDataTable) {
-		String query = "SELECT numberOfDocs from " + (isUserDataTable?"userdataclasscontents":"classcontents") + " where classId>="
-				+ startingClassId + " AND classId<=" + endingClassId + ";";
+	public ArrayList<Integer> getNumberOfDocuments(int startingClassId,
+			int endingClassId, boolean isUserDataTable) {
+		String query = "SELECT numberOfDocs from "
+				+ (isUserDataTable ? "userdataclasscontents" : "classcontents")
+				+ " where classId>=" + startingClassId + " AND classId<="
+				+ endingClassId + ";";
 		ArrayList<Integer> classContents = new ArrayList<Integer>();
 		try {
 			Statement statement = connection.createStatement();
@@ -526,6 +581,7 @@ public class DatabaseConnector {
 
 	/**
 	 * Given a classId, this function returns the name of the class.
+	 * 
 	 * @param classId
 	 * @return
 	 */
@@ -550,11 +606,14 @@ public class DatabaseConnector {
 
 	/**
 	 * Returns the list of all terms present in the database.
-	 * @param isUserDataTable 
+	 * 
+	 * @param isUserDataTable
 	 * @return
 	 */
 	public ArrayList<String> getTermsList(boolean isUserDataTable) {
-		String query = "SELECT distinct(term) from "+ (isUserDataTable?"userdataterms":"termdistribution")+";";
+		String query = "SELECT distinct(term) from "
+				+ (isUserDataTable ? "userdataterms" : "termdistribution")
+				+ ";";
 		ArrayList<String> termsList = new ArrayList<String>();
 		try {
 			Statement statement = connection.createStatement();
@@ -633,15 +692,19 @@ public class DatabaseConnector {
 	}
 
 	/**
-	 * Given a term and classId, this functions tells you if there's a <term,classId,A> mapping
+	 * Given a term and classId, this functions tells you if there's a
+	 * <term,classId,A> mapping
+	 * 
 	 * @param term
 	 * @param classId
-	 * @param isUserDataTable 
+	 * @param isUserDataTable
 	 * @return
 	 */
-	public Boolean isTermPresentInTermDistribution(String term, int classId, boolean isUserDataTable) {
-		String query = "SELECT * from "+(isUserDataTable?"userdataterms":"termdistribution")+" where term='" + term
-				+ "' and classId = " + classId + ";";
+	public Boolean isTermPresentInTermDistribution(String term, int classId,
+			boolean isUserDataTable) {
+		String query = "SELECT * from "
+				+ (isUserDataTable ? "userdataterms" : "termdistribution")
+				+ " where term='" + term + "' and classId = " + classId + ";";
 		Boolean isTermPresent = false;
 		try {
 			Statement statement = connection.createStatement();
@@ -660,10 +723,14 @@ public class DatabaseConnector {
 
 	/**
 	 * Given a classId, the class contents for that classId are incremented.
+	 * 
 	 * @param classId
 	 */
 	public void updateClassContents(int classId, boolean isUserDataTable) {
-		String query = "Update `" + (isUserDataTable?"userdataclasscontents":"classcontents") + "` SET numberOfDocs = numberOfDocs + 1 Where classId=" + classId + ";";
+		String query = "Update `"
+				+ (isUserDataTable ? "userdataclasscontents" : "classcontents")
+				+ "` SET numberOfDocs = numberOfDocs + 1 Where classId="
+				+ classId + ";";
 		try {
 			Statement statement = connection.createStatement();
 			statement.executeUpdate(query);
@@ -675,39 +742,46 @@ public class DatabaseConnector {
 	}
 
 	/**
-	 * Given a set of terms, the termDistribution table is updated. Old terms are updated and new terms are added.
+	 * Given a set of terms, the termDistribution table is updated. Old terms
+	 * are updated and new terms are added.
+	 * 
 	 * @param tokens
 	 * @param classId
 	 */
-	public void updateTermDistribution(ArrayList<String> tokens, int classId, boolean isUserDataTable) {
+	public void updateTermDistribution(ArrayList<String> tokens, int classId,
+			boolean isUserDataTable) {
 		ArrayList<String> oldTerms = new ArrayList<String>();
 		ArrayList<String> newTerms = new ArrayList<String>();
 		for (String term : tokens) {
-			if (!isTermPresentInTermDistribution(term, classId,isUserDataTable)) {
+			if (!isTermPresentInTermDistribution(term, classId, isUserDataTable)) {
 				newTerms.add(term);
 			} else {
 				oldTerms.add(term);
 			}
 		}
-		updateTermInfo(oldTerms, classId,isUserDataTable);
-		insertTermInfo(newTerms, classId,isUserDataTable);
+		updateTermInfo(oldTerms, classId, isUserDataTable);
+		insertTermInfo(newTerms, classId, isUserDataTable);
 	}
 
 	/**
-	 * Given a couple of terms and a classId, this function adds the <term,classId,A> mapping
+	 * Given a couple of terms and a classId, this function adds the
+	 * <term,classId,A> mapping
 	 * 
 	 * @param newTerms
 	 * @param classId
-	 * @param isUserDataTable 
+	 * @param isUserDataTable
 	 */
-	public void insertTermInfo(ArrayList<String> newTerms, int classId, boolean isUserDataTable) {
+	public void insertTermInfo(ArrayList<String> newTerms, int classId,
+			boolean isUserDataTable) {
 		String query = "";
 		try {
 			Statement statement = connection.createStatement();
 			for (int i = 0; i < newTerms.size(); i++) {
 				if (i % 450 == 0) {
 					statement.executeUpdate(query);
-					query = "INSERT INTO `" + (isUserDataTable?"userdataterms":"termdistribution") + "` Select '"
+					query = "INSERT INTO `"
+							+ (isUserDataTable ? "userdataterms"
+									: "termdistribution") + "` Select '"
 							+ newTerms.get(i) + "' AS `term`, " + classId
 							+ " AS `classId`, 1 AS `A`";
 				} else {
@@ -725,14 +799,18 @@ public class DatabaseConnector {
 
 	/**
 	 * Increments the count of <term,classId,A> mappings.
+	 * 
 	 * @param oldTerms
 	 * @param classId
 	 */
-	public void updateTermInfo(ArrayList<String> oldTerms, int classId, boolean isUserDataTable) {
+	public void updateTermInfo(ArrayList<String> oldTerms, int classId,
+			boolean isUserDataTable) {
 		int numOfTerms = oldTerms.size();
 		int iterator = 0;
 		while (iterator < numOfTerms) {
-			String query = "Update "+ (isUserDataTable?"userdataterms":"termdistribution")+" SET `A` = `A` + 1 Where (term='"
+			String query = "Update "
+					+ (isUserDataTable ? "userdataterms" : "termdistribution")
+					+ " SET `A` = `A` + 1 Where (term='"
 					+ oldTerms.get(iterator) + "' ";
 			iterator++;
 			while (iterator % 950 != 0 && iterator < numOfTerms) {
@@ -750,13 +828,14 @@ public class DatabaseConnector {
 			}
 		}
 	}
-		
+
 	/*************************************************************************
 	 * Methods that work on the activities table follow
 	 **************************************************************************/
-	
+
 	/**
 	 * Basic function that inserts an activityDao into the Database.
+	 * 
 	 * @param activityDaos
 	 */
 	public void insertActivityIntoDB(ArrayList<ActivityDao> activityDaos) {
@@ -792,7 +871,10 @@ public class DatabaseConnector {
 	}
 
 	/**
-	 * This function tells you the timeStamp of the last performed activity. Useful while inserting activities to the table. You don't insert something with a higher timestamp than this.
+	 * This function tells you the timeStamp of the last performed activity.
+	 * Useful while inserting activities to the table. You don't insert
+	 * something with a higher timestamp than this.
+	 * 
 	 * @return
 	 */
 	public String getMaxActivityTimeStamp() {
@@ -817,7 +899,9 @@ public class DatabaseConnector {
 	}
 
 	/**
-	 * Gets an ArrayList of activityDaos which have not been assigned a class yet.
+	 * Gets an ArrayList of activityDaos which have not been assigned a class
+	 * yet.
+	 * 
 	 * @return
 	 */
 	public ArrayList<ActivityDao> getUnclassifiedActivities() {
@@ -847,10 +931,11 @@ public class DatabaseConnector {
 
 	/**
 	 * Updates the className field of the activities table.
+	 * 
 	 * @param activityDaos
 	 */
 	public void updateActivities(ArrayList<ActivityDao> activityDaos) {
-		if(activityDaos.size()==0){
+		if (activityDaos.size() == 0) {
 			return;
 		}
 		String query = "UPDATE `activities` SET `assignedClass` = CASE activityId ";
@@ -873,6 +958,98 @@ public class DatabaseConnector {
 		}
 	}
 
+	/*************************************************************************
+	 * Methods that work on the messages tables follow
+	 **************************************************************************/
 
+	/**
+	 * Basic question that adds a question asked by our user to the
+	 * questionmessages table.
+	 * 
+	 * @param question
+	 */
+	public void addQuestion(String question) {
+		String query = "INSERT INTO `questionmessages`(`question`) VALUES(\""
+				+ question + "\");";
+		try {
+			Statement statement = connection.createStatement();
+			statement.executeUpdate(query);
+		} catch (SQLException e) {
+			System.out.println("Exception Caught for query " + query + " \n"
+					+ e);
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 
+	 * When an answer is received, we store it here.
+	 * 
+	 * @param questionId
+	 * @param answer
+	 * @param similarity
+	 */
+	public void addAnswer(int questionId, int answer, Double similarity) {
+		String query = "INSERT INTO `answermessages`(`questionId`,`answer`,`similarity`) VALUES("
+				+ questionId + "," + answer + "," + similarity + ");";
+		try {
+			Statement statement = connection.createStatement();
+			statement.executeUpdate(query);
+		} catch (SQLException e) {
+			System.out.println("Exception Caught for query " + query + " \n"
+					+ e);
+			e.printStackTrace();
+		}
+	}
 	
+	/**
+	 * Get the questionId of the last asked question.
+	 * @return
+	 */
+	public int getMaxQuestionId(){
+		String query = "SELECT MAX(questionId) from questionmessages;";
+		int questionId = 0;
+		try {
+			Statement statement = connection.createStatement();
+			ResultSet resultSet;
+			resultSet = statement.executeQuery(query);
+			while (resultSet.next()) {
+				questionId = resultSet.getInt("MAX(questionId)");
+			}
+		} catch (SQLException e) {
+			System.out.println("Exception Caught for query " + query + " \n"
+					+ e);
+			e.printStackTrace();
+		}
+		return questionId;
+	}
+
+	/**
+	 * Given a questionId, I'll return the weighted answer
+	 * @return 
+	 */
+	public Double getWeightedAnswer(int questionId) {
+		String query = "Select * from `answermessages` WHERE questionId = "
+				+ questionId + ";";
+		Double totalSimilarity = 0.0;
+		Double weightedAnswer = 0.0;
+		try {
+			Statement statement = connection.createStatement();
+			ResultSet resultSet;
+			resultSet = statement.executeQuery(query);
+			while (resultSet.next()) {
+				int answer = resultSet.getInt("answer");
+				Double similarity = resultSet.getDouble("similarity");
+				weightedAnswer += (answer*similarity);
+				totalSimilarity += similarity;
+			}
+			weightedAnswer = weightedAnswer/totalSimilarity;
+		} catch (SQLException e) {
+			System.out.println("Exception Caught for query " + query + " \n"
+					+ e);
+			e.printStackTrace();
+		}
+		return weightedAnswer;
+	}
+
 }

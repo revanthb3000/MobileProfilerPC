@@ -12,6 +12,7 @@ import it.unipr.ce.dsg.s2p.sip.Address;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.iitg.mobileprofiler.db.DatabaseConnector;
 import org.iitg.mobileprofiler.p2p.msg.JoinMessage;
 import org.iitg.mobileprofiler.p2p.msg.PeerListMessage;
 import org.iitg.mobileprofiler.p2p.msg.PeerListRequestMessage;
@@ -96,6 +97,7 @@ public class UserNodePeer extends Peer {
 				}
 			}
 			if(peerMsg.get("type").equals(UserQueryMessage.MSG_USER_QUERY)){
+				int questionId = Integer.parseInt(peerMsg.get("askerQuestionId").toString());
 				String question = peerMsg.get("textMessage").toString();
 				String userName = params.get("name").toString();
 				String ipAddress = params.get("contactAddress").toString().split("@")[1];
@@ -105,16 +107,26 @@ public class UserNodePeer extends Peer {
 				
 				int rating = 8;
 				
-				QueryReplyMessage queryReplyMessage = new QueryReplyMessage(peerDescriptor, question, UtilityFunctions.getSimilarityScore(questionClassDistribution, classContents), rating);
+				QueryReplyMessage queryReplyMessage = new QueryReplyMessage(peerDescriptor, question, UtilityFunctions.getSimilarityScore(questionClassDistribution, classContents), rating, questionId);
 				send(new Address(ipAddress), queryReplyMessage);
 			}
 			if(peerMsg.get("type").equals(QueryReplyMessage.MSG_QUERY_REPLY)){
 				System.out.println("Got a reply");
 				String question = peerMsg.get("question").toString();
 				String userName = params.get("name").toString();
+				
 				System.out.println(userName + " answered : " + question);
 				System.out.println("Rating : " + peerMsg.get("answer"));
 				System.out.println("Similarity : " + peerMsg.get("similarity"));
+				
+				int questionId = Integer.parseInt(peerMsg.get("askerQuestionId").toString());
+				int answer = Integer.parseInt(peerMsg.get("answer").toString());
+				Double similarity = Double.parseDouble(peerMsg.get("similarity").toString());
+
+				DatabaseConnector databaseConnector = new DatabaseConnector();
+				databaseConnector.addAnswer(questionId, answer, similarity);
+				databaseConnector.closeDBConnection();
+				
 			}
 		} catch (JSONException e) {
 			throw new RuntimeException(e);
@@ -210,7 +222,12 @@ public class UserNodePeer extends Peer {
 	}
 	
 	public void sendQuestionToPeer(String toAddress, String message){
-		UserQueryMessage textMessage = new UserQueryMessage(peerDescriptor, message, classContents);
+		DatabaseConnector databaseConnector = new DatabaseConnector();
+		int questionId = databaseConnector.getMaxQuestionId() + 1;
+		databaseConnector.addQuestion(message);
+		databaseConnector.closeDBConnection();
+		
+		UserQueryMessage textMessage = new UserQueryMessage(peerDescriptor, message, classContents,questionId);
 		send(new Address(toAddress), textMessage);
 	}
 	

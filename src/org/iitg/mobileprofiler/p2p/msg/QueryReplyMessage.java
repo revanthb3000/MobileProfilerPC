@@ -17,15 +17,18 @@ public class QueryReplyMessage extends BasicMessage {
 	
 	private String question;
 	
+	private int askerQuestionId;
+	
 	private Double similarity;
 	
 	private Integer answer;
 
-	public QueryReplyMessage(PeerDescriptor peerDesc, String questionToAnswer, Double simiarityScore, Integer rating) {
+	public QueryReplyMessage(PeerDescriptor peerDesc, String questionToAnswer, Double similarityScore, Integer rating, int questionId) {
 		super(MSG_QUERY_REPLY, new Payload(peerDesc));
 		question = questionToAnswer;
-		similarity = simiarityScore;
+		similarity = similarityScore;
 		answer = rating;
+		askerQuestionId = questionId;
 	}
 
 	public String getQuestion() {
@@ -39,7 +42,10 @@ public class QueryReplyMessage extends BasicMessage {
 	public Integer getAnswer() {
 		return answer;
 	}
-	
+
+	public int getAskerQuestionId() {
+		return askerQuestionId;
+	}
 	
 
 }
