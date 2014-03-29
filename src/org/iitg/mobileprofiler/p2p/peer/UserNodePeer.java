@@ -100,7 +100,7 @@ public class UserNodePeer extends Peer {
 				int questionId = Integer.parseInt(peerMsg.get("askerQuestionId").toString());
 				String question = peerMsg.get("textMessage").toString();
 				String userName = params.get("name").toString();
-				String ipAddress = params.get("contactAddress").toString().split("@")[1];
+				String ipAddress = peerMsg.getString("fromAddress");
 				ArrayList<Integer> questionClassDistribution = UtilityFunctions.getClassDistributionFromString(peerMsg.get("classDistribution").toString());
 				
 				System.out.println("Question from " + userName + ": " + question);
@@ -221,14 +221,14 @@ public class UserNodePeer extends Peer {
 		}
 	}
 	
-	public void sendQuestionToPeer(String toAddress, String message){
+	public void sendQuestionToPeers(String message){
 		DatabaseConnector databaseConnector = new DatabaseConnector();
 		int questionId = databaseConnector.getMaxQuestionId() + 1;
 		databaseConnector.addQuestion(message);
 		databaseConnector.closeDBConnection();
 		
-		UserQueryMessage textMessage = new UserQueryMessage(peerDescriptor, message, classContents,questionId);
-		send(new Address(toAddress), textMessage);
+		UserQueryMessage textMessage = new UserQueryMessage(peerDescriptor, message, classContents,questionId, getAddress().getHost() + ":" + getAddress().getPort());
+		send(new Address(bootstrapAddress), textMessage);
 	}
 	
 	public void sendPeerListRequestMessage(){

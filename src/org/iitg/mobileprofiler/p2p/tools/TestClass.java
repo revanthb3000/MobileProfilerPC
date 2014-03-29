@@ -78,9 +78,7 @@ public class TestClass {
 				System.out.print("What is your message ? ");
 				String message = scanner.nextLine();
 				
-				System.out.print("Where should I send it to ? ");
-				String toAddress = scanner.nextLine();
-				peer.sendQuestionToPeer(toAddress, message);
+				peer.sendQuestionToPeers(message);
 			}
 			else if(userInput==5){
 				peer.pingToPeerRandomFromList();

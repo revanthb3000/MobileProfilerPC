@@ -1,5 +1,6 @@
 package org.iitg.mobileprofiler.p2p.peer;
 
+import it.unipr.ce.dsg.s2p.message.BasicMessage;
 import it.unipr.ce.dsg.s2p.message.parser.JSONParser;
 import it.unipr.ce.dsg.s2p.org.json.JSONException;
 import it.unipr.ce.dsg.s2p.org.json.JSONObject;
@@ -11,6 +12,9 @@ import it.unipr.ce.dsg.s2p.sip.Address;
 import org.iitg.mobileprofiler.p2p.msg.JoinMessage;
 import org.iitg.mobileprofiler.p2p.msg.PeerListMessage;
 import org.iitg.mobileprofiler.p2p.msg.PeerListRequestMessage;
+import org.iitg.mobileprofiler.p2p.msg.UserQueryMessage;
+
+import com.google.gson.Gson;
 
 /**
  * This is the BootStrap peer that is your one stop shop for nodes info.
@@ -77,6 +81,12 @@ public class BootstrapPeer extends Peer {
 				if(newPLMsg.getPayload().containsKey(params.get("key").toString()))
 					newPLMsg.getPayload().removeParam(params.get("key").toString());
 				send(new Address(params.get("address").toString()), newPLMsg);
+			}
+			else if(peerMsg.get("type").equals(UserQueryMessage.MSG_USER_QUERY)){
+				String ignoreAddress = peerMsg.get("fromAddress").toString();
+				Gson gson = new Gson();
+				UserQueryMessage userQueryMessage = gson.fromJson(peerMsg.toString(), UserQueryMessage.class);
+				broadcastMessage(userQueryMessage, ignoreAddress);
 			}
 			
 		} catch (JSONException e) {
@@ -154,6 +164,20 @@ public class BootstrapPeer extends Peer {
 				e.printStackTrace();
 			}
 			
+		}
+	}
+	
+	/**
+	 * Broadcast a message to all peers except the ignoreAddress peer
+	 * @param message 
+	 */
+	public void broadcastMessage(BasicMessage message, String ignoreAddress){
+		for(String key : peerList.keySet()){
+			NeighborPeerDescriptor peer = peerList.get(key);
+			if(peer.getContactAddress().contains(ignoreAddress)){
+				continue;
+			}
+			send(new Address(peer.getContactAddress()), message);
 		}
 	}
 
