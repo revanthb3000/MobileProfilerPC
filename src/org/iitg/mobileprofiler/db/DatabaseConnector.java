@@ -1051,5 +1051,27 @@ public class DatabaseConnector {
 		}
 		return weightedAnswer;
 	}
+	
+	/**
+	 * Given a questionId, this will return the question. Null, if not.
+	 * @param questionId
+	 * @return
+	 */
+	public String getQuestion(int questionId){
+		String query = "Select question from `questionmessages` WHERE questionId = " + questionId + ";";
+		String question = null;
+		try {
+			Statement statement = connection.createStatement();
+			ResultSet resultSet;
+			resultSet = statement.executeQuery(query);
+			while (resultSet.next()) {
+				question = resultSet.getString("question");
+			}
+		} catch (SQLException e) {
+			System.out.println("Exception Caught for query " + query + " \n" + e);
+			e.printStackTrace();
+		}
+		return question;
+	}
 
 }
