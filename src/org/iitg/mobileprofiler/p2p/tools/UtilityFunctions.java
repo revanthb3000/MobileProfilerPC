@@ -67,6 +67,9 @@ public class UtilityFunctions {
 		for(int i=0;i<contents1.size();i++){
 			similarity += (contents1.get(i)*contents2.get(i));
 		}
+		if(similarity == 0){
+			return similarity;
+		}
 		similarity = similarity/getVectorMagnitude(contents1);
 		similarity = similarity/getVectorMagnitude(contents2);
 		return similarity;
