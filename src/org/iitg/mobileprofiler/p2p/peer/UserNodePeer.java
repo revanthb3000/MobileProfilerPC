@@ -19,6 +19,7 @@ import org.iitg.mobileprofiler.p2p.msg.PeerListRequestMessage;
 import org.iitg.mobileprofiler.p2p.msg.PingMessage;
 import org.iitg.mobileprofiler.p2p.msg.QueryReplyMessage;
 import org.iitg.mobileprofiler.p2p.msg.UserQueryMessage;
+import org.iitg.mobileprofiler.p2p.tools.PendingQuestion;
 import org.iitg.mobileprofiler.p2p.tools.UtilityFunctions;
 
 /**
@@ -44,12 +45,15 @@ public class UserNodePeer extends Peer {
 	 */
 	private int numberOfPeers;
 	
+	private ArrayList<PendingQuestion> pendingQuestions;
+	
 	public UserNodePeer(String key, String peerName, int peerPort, ArrayList<Integer> userClassContents, String bootstrapInfo, String SBCAddress, int numOfPeers){
 		super(null, key, peerName, peerPort);
 		classContents = userClassContents;
 		bootstrapAddress = bootstrapInfo;
 		numberOfPeers = numOfPeers;
 		nodeConfig.sbc = SBCAddress;
+		pendingQuestions = new ArrayList<PendingQuestion>();
 	}
 	
 	public PeerListManager getPeerList(){
@@ -58,6 +62,10 @@ public class UserNodePeer extends Peer {
 	
 	public ArrayList<Integer> getClassContents() {
 		return classContents;
+	}
+
+	public ArrayList<PendingQuestion> getPendingQuestions() {
+		return pendingQuestions;
 	}
 
 	@Override
@@ -102,13 +110,11 @@ public class UserNodePeer extends Peer {
 				String userName = params.get("name").toString();
 				String ipAddress = peerMsg.getString("fromAddress");
 				ArrayList<Integer> questionClassDistribution = UtilityFunctions.getClassDistributionFromString(peerMsg.get("classDistribution").toString());
+				Double similarity = UtilityFunctions.getSimilarityScore(questionClassDistribution, classContents);
 				
 				System.out.println("Question from " + userName + ": " + question);
 				
-				int rating = 8;
-				
-				QueryReplyMessage queryReplyMessage = new QueryReplyMessage(peerDescriptor, question, UtilityFunctions.getSimilarityScore(questionClassDistribution, classContents), rating, questionId);
-				send(new Address(ipAddress), queryReplyMessage);
+				pendingQuestions.add(new PendingQuestion(question, similarity, questionId, ipAddress, this));
 			}
 			if(peerMsg.get("type").equals(QueryReplyMessage.MSG_QUERY_REPLY)){
 				System.out.println("Got a reply");
@@ -229,6 +235,11 @@ public class UserNodePeer extends Peer {
 		
 		UserQueryMessage textMessage = new UserQueryMessage(peerDescriptor, message, classContents,questionId, getAddress().getHost() + ":" + getAddress().getPort());
 		send(new Address(bootstrapAddress), textMessage);
+	}
+	
+	public void sendReply(String question, Double similarity, int answer, int questionId, String destinationIpAddress){
+		QueryReplyMessage queryReplyMessage = new QueryReplyMessage(peerDescriptor, question, similarity, answer, questionId);
+		send(new Address(destinationIpAddress), queryReplyMessage);
 	}
 	
 	public void sendPeerListRequestMessage(){

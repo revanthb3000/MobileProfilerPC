@@ -59,7 +59,7 @@ public class TestClass {
 											 ipAddress + ":" + SBCPort ,0);
 		
 		while(true){
-			System.out.print("What would you like to do ?\n1.Join the network.\n2.Get list of peers.\n3.Update peers list.\n4.Send a message to peer.\n5.Send ping to random peer.\n6.Contact SBC\nYour option : ");
+			System.out.print("What would you like to do ?\n1.Join the network.\n2.Get list of peers.\n3.Update peers list.\n4.Send a message to peer.\n5.See pending questions and reply to all.\n6.Contact SBC\nYour option : ");
 			Integer userInput = in.nextInt();
 			if(userInput==1){
 				peer.joinToBootstrapPeer();	
@@ -81,7 +81,10 @@ public class TestClass {
 				peer.sendQuestionToPeers(message);
 			}
 			else if(userInput==5){
-				peer.pingToPeerRandomFromList();
+				for(PendingQuestion pendingQuestion : peer.getPendingQuestions()){
+					pendingQuestion.setAnswer(6);
+					pendingQuestion.sendReply();
+				}
 			}
 			else if(userInput==6){
 				peer.contactSBC();
