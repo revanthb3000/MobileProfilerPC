@@ -1043,7 +1043,12 @@ public class DatabaseConnector {
 				weightedAnswer += (answer*similarity);
 				totalSimilarity += similarity;
 			}
-			weightedAnswer = weightedAnswer/totalSimilarity;
+			if(totalSimilarity==0.0){
+				weightedAnswer = 0.0;
+			}
+			else{
+				weightedAnswer = weightedAnswer/totalSimilarity;	
+			}
 		} catch (SQLException e) {
 			System.out.println("Exception Caught for query " + query + " \n"
 					+ e);
