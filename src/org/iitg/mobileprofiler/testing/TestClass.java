@@ -16,8 +16,9 @@ public class TestClass {
 //		System.out.println(className);
 //		className = UtilityFunctions.classifyUrl("https://code.google.com/p/sqlite-manager/issues/list", false);
 //		System.out.println(className);
-		UtilityFunctions.classifyExperimentalOutput("input.txt");
-		UtilityFunctions.writeClassContentsToFile("classContents.txt", true);
-		System.out.println("Done !!!");
+//		UtilityFunctions.classifyExperimentalOutput("input.txt");
+//		UtilityFunctions.writeClassContentsToFile("classContents.txt", true);
+//		System.out.println("Done !!!");
+		UtilityFunctions.writeClassMappingToFile();
 	}
 }

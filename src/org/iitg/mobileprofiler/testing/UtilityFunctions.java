@@ -42,6 +42,21 @@ public class UtilityFunctions {
 		writeFeaturesToFile();
 		writeGiniCoeffsToFile();
 	}
+
+	/**
+	 * This function writes the classIds and classNames to a file.
+	 * @throws IOException 
+	 */
+	public static void writeClassMappingToFile() throws IOException{
+		FileWriter fileWriter = new FileWriter("classMapping.txt");
+		BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+		DatabaseConnector databaseConnector = new DatabaseConnector();
+		for(int i=0; i< databaseConnector.getNumberOfClasses();i++){
+			bufferedWriter.write(i + " - " + databaseConnector.getClassName(i) + "\n");
+		}
+		bufferedWriter.close();
+		fileWriter.close();
+	}
 	
 	/**
 	 * This function: 1) Deletes the existing features. 2) Uses the term
