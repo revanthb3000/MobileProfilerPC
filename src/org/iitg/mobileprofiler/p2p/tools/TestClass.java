@@ -6,7 +6,6 @@ import it.unipr.ce.dsg.s2p.peer.PeerListManager;
 import java.util.Date;
 import java.util.Scanner;
 
-import org.iitg.mobileprofiler.p2p.peer.BootstrapPeer;
 import org.iitg.mobileprofiler.p2p.peer.UserNodePeer;
 
 /**
@@ -19,29 +18,14 @@ public class TestClass {
 	
 	private static Scanner in = null;
 	
-	private static String ipAddress = "192.168.1.3";
+	private static String ipAddress = "172.16.27.15";
 	
 	private static int boostrapPort = 5080;
 	
 	private static int SBCPort = 6066;
 
 	public static void main(String[] args) throws JSONException {
-		in = new Scanner(System.in);
-		System.out.print("What type of node ?\n1.Bootstrap Node.\n2.UserNode Peer.\nYour choice : ");
-		
-		Integer userInput;
-		userInput = Integer.parseInt(in.nextLine());
-
-		if (userInput == 1) {
-			startBootstrapNode();
-		} else if (userInput == 2) {
-			startFullPeerUserNode();
-		}
-	}
-
-	public static void startBootstrapNode() {
-		BootstrapPeer peer = new BootstrapPeer(UtilityFunctions.getHexDigest("bootstrap"),"bootstrap",boostrapPort);
-		System.out.println("BootStrap Node has started - " + peer.toString());
+		startFullPeerUserNode();
 	}
 	
 	public static void startFullPeerUserNode(){

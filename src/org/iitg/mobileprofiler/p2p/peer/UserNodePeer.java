@@ -18,6 +18,7 @@ import org.iitg.mobileprofiler.p2p.msg.PeerListMessage;
 import org.iitg.mobileprofiler.p2p.msg.PeerListRequestMessage;
 import org.iitg.mobileprofiler.p2p.msg.PingMessage;
 import org.iitg.mobileprofiler.p2p.msg.QueryReplyMessage;
+import org.iitg.mobileprofiler.p2p.msg.RepoStorageMessage;
 import org.iitg.mobileprofiler.p2p.msg.UserQueryMessage;
 import org.iitg.mobileprofiler.p2p.tools.PendingQuestion;
 import org.iitg.mobileprofiler.p2p.tools.UtilityFunctions;
@@ -239,7 +240,9 @@ public class UserNodePeer extends Peer {
 	
 	public void sendReply(String question, Double similarity, int answer, int questionId, String destinationIpAddress){
 		QueryReplyMessage queryReplyMessage = new QueryReplyMessage(peerDescriptor, question, similarity, answer, questionId);
+		RepoStorageMessage repoStorageMessage = new RepoStorageMessage(peerDescriptor, question, peerDescriptor.getName() , answer);
 		send(new Address(destinationIpAddress), queryReplyMessage);
+		send(new Address(bootstrapAddress), repoStorageMessage);
 	}
 	
 	public void sendPeerListRequestMessage(){
