@@ -1153,20 +1153,20 @@ public class DatabaseConnector {
 	 */
 	public int getMaxResponseId(){
 		String query = "SELECT MAX(responseId) from responses;";
-		int questionId = 0;
+		int responseId = 0;
 		try {
 			Statement statement = connection.createStatement();
 			ResultSet resultSet;
 			resultSet = statement.executeQuery(query);
 			while (resultSet.next()) {
-				questionId = resultSet.getInt("MAX(responseId)");
+				responseId = resultSet.getInt("MAX(responseId)");
 			}
 		} catch (SQLException e) {
 			System.out.println("Exception Caught for query " + query + " \n"
 					+ e);
 			e.printStackTrace();
 		}
-		return questionId;
+		return responseId;
 	}
 	
 	/**
