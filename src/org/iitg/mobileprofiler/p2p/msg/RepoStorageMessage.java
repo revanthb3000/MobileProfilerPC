@@ -6,6 +6,8 @@ import it.unipr.ce.dsg.s2p.peer.PeerDescriptor;
 
 /**
  * See if we need to add a class type element.
+ * This is used by nodes that answer questions. They send this type of message 
+ * to the bootstrap and the bootstrap stores this info in the repo
  * @author RB
  *
  */
