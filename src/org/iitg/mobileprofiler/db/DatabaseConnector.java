@@ -1197,4 +1197,54 @@ public class DatabaseConnector {
 		return responseDaos;
 	}
 	
+	
+	/**
+	 * Given a question, this function returns all responses.
+	 * @param question
+	 * @return 
+	 */
+	public ArrayList<ResponseDao> getAnswersOfQuestion(String question){
+		String query = "Select * from `responses` Where question='"+question+"';";
+		ArrayList<ResponseDao> responseDaos = new ArrayList<ResponseDao>();
+		try {
+			Statement statement = connection.createStatement();
+			ResultSet resultSet;
+			resultSet = statement.executeQuery(query);
+			while (resultSet.next()) {
+				String userId = resultSet.getString("userId");
+				int answer = resultSet.getInt("answer");
+				String className = resultSet.getString("className");
+				responseDaos.add(new ResponseDao(userId, question, answer, className));
+			}
+		} catch (SQLException e) {
+			System.out.println("Exception Caught for query " + query + " \n"
+					+ e);
+			e.printStackTrace();
+		}
+		return responseDaos;
+	}
+	
+	/**
+	 * Returns a list of unique questions in repo.
+	 * @return
+	 */
+	public ArrayList<String> getQuestionsList(){
+		String query = "Select distinct(question) from `responses`;";
+		ArrayList<String> questions = new ArrayList<String>();
+		try {
+			Statement statement = connection.createStatement();
+			ResultSet resultSet;
+			resultSet = statement.executeQuery(query);
+			while (resultSet.next()) {
+				String question = resultSet.getString("question");
+				questions.add(question);
+			}
+		} catch (SQLException e) {
+			System.out.println("Exception Caught for query " + query + " \n"
+					+ e);
+			e.printStackTrace();
+		}
+		return questions;
+	}
+	
 }
