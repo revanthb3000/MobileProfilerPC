@@ -1067,6 +1067,31 @@ public class DatabaseConnector {
 	}
 
 	/**
+	 * Given a questionId, the number of replies is returned.
+	 * 
+	 * @param questionId
+	 * @return
+	 */
+	public int getNumberOfReplies(int questionId) {
+		String query = "SELECT COUNT(answerId) from `answermessages` WHERE questionId = "
+				+ questionId + ";";
+		int numberOfAnswers = 0;
+		try {
+			Statement statement = connection.createStatement();
+			ResultSet resultSet;
+			resultSet = statement.executeQuery(query);
+			while (resultSet.next()) {
+				numberOfAnswers = resultSet.getInt("COUNT(answerId)");
+			}
+		} catch (SQLException e) {
+			System.out.println("Exception Caught for query " + query + " \n"
+					+ e);
+			e.printStackTrace();
+		}
+		return numberOfAnswers;
+	}
+
+	/**
 	 * Given a questionId, this will return the question. Null, if not.
 	 * 
 	 * @param questionId
@@ -1187,6 +1212,7 @@ public class DatabaseConnector {
 
 	/**
 	 * Given a response Dao, this function returns the maximum responseId.
+	 * 
 	 * @param responseDao
 	 * @return
 	 */
