@@ -1161,12 +1161,41 @@ public class DatabaseConnector {
 	}
 
 	/**
-	 * Gets the max responseId present in the table.
+	 * Gets the max responseId present in the table (we remove the user's Id
+	 * from consideration)
 	 * 
 	 * @return
 	 */
-	public int getMaxResponseId() {
-		String query = "SELECT MAX(responseId) from responses;";
+	public int getMaxResponseId(String blacklistUserId) {
+		String query = "SELECT MAX(responseId) from responses WHERE userId!=\""
+				+ blacklistUserId + "\";";
+		int responseId = 0;
+		try {
+			Statement statement = connection.createStatement();
+			ResultSet resultSet;
+			resultSet = statement.executeQuery(query);
+			while (resultSet.next()) {
+				responseId = resultSet.getInt("MAX(responseId)");
+			}
+		} catch (SQLException e) {
+			System.out.println("Exception Caught for query " + query + " \n"
+					+ e);
+			e.printStackTrace();
+		}
+		return responseId;
+	}
+
+	/**
+	 * Given a response Dao, this function returns the maximum responseId.
+	 * @param responseDao
+	 * @return
+	 */
+	public int getResponseIdGivenDao(ResponseDao responseDao) {
+		String query = "SELECT MAX(responseId) from responses WHERE userId=\""
+				+ responseDao.getUserId() + "\" AND question=\""
+				+ responseDao.getQuestion() + "\"" + " AND answer="
+				+ responseDao.getAnswer() + " AND className=\""
+				+ responseDao.getClassName() + "\" AND ;";
 		int responseId = 0;
 		try {
 			Statement statement = connection.createStatement();

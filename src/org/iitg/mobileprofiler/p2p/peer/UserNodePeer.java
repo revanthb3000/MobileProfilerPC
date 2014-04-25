@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.iitg.mobileprofiler.db.DatabaseConnector;
+import org.iitg.mobileprofiler.db.ResponseDao;
 import org.iitg.mobileprofiler.p2p.msg.JoinMessage;
 import org.iitg.mobileprofiler.p2p.msg.PeerListMessage;
 import org.iitg.mobileprofiler.p2p.msg.PeerListRequestMessage;
@@ -325,9 +326,10 @@ public class UserNodePeer extends Peer {
 	
 	public void updateRepo(){
 		DatabaseConnector databaseConnector = new DatabaseConnector();
-		int maxResponseId = databaseConnector.getMaxResponseId();
+		int maxResponseId = databaseConnector.getMaxResponseId(peerDescriptor.getName());
+		ResponseDao responseDao = databaseConnector.getResponses(maxResponseId, maxResponseId).get(0);
 		databaseConnector.closeDBConnection();
-		ResponseRequestMessage responseRequestMessage = new ResponseRequestMessage(peerDescriptor, maxResponseId);
+		ResponseRequestMessage responseRequestMessage = new ResponseRequestMessage(peerDescriptor, responseDao);
 		send(new Address(bootstrapAddress), responseRequestMessage);
 	}
 
