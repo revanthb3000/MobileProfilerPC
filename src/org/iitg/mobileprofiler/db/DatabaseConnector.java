@@ -1032,6 +1032,29 @@ public class DatabaseConnector {
 		}
 		return questionId;
 	}
+	
+	/**
+	 * Get the className from Question ID
+	 * 
+	 * @return
+	 */
+	public String getQuestionClassName(int questionId) {
+		String query = "SELECT className from questionmessages where questionId = "+questionId+";";
+		String className = "";
+		try {
+			Statement statement = connection.createStatement();
+			ResultSet resultSet;
+			resultSet = statement.executeQuery(query);
+			while (resultSet.next()) {
+				className = resultSet.getString("className");
+			}
+		} catch (SQLException e) {
+			System.out.println("Exception Caught for query " + query + " \n"
+					+ e);
+			e.printStackTrace();
+		}
+		return className;
+	}
 
 	/**
 	 * Given a questionId, I'll return the weighted answer
