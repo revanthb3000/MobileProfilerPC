@@ -5,6 +5,8 @@ import org.iitg.mobileprofiler.p2p.peer.UserNodePeer;
 public class PendingQuestion {
 
 	private String question;
+	
+	private String className;
 
 	private Double similarity;
 	
@@ -15,17 +17,19 @@ public class PendingQuestion {
 	private String destinationIpAddress;
 	
 	private UserNodePeer userNodePeer;
+	
 
-	public PendingQuestion(String question, Double similarity, int questionId, String destinationIpAddress, UserNodePeer userNodePeer) {
+	public PendingQuestion(String question, String className, Double similarity, int questionId, String destinationIpAddress, UserNodePeer userNodePeer) {
 		this.question = question;
 		this.similarity = similarity;
 		this.questionId = questionId;
 		this.destinationIpAddress = destinationIpAddress;
 		this.userNodePeer = userNodePeer;
+		this.className = className;
 	}
 	
-	public void sendReply(){
-		userNodePeer.sendReply(question, similarity, answer, questionId, destinationIpAddress);
+	public void sendReply(Boolean isPublic){
+		userNodePeer.sendReply(question, className, similarity, answer, questionId, destinationIpAddress, isPublic);
 	}
 
 	public String getQuestion() {
@@ -74,6 +78,14 @@ public class PendingQuestion {
 
 	public void setUserNodePeer(UserNodePeer userNodePeer) {
 		this.userNodePeer = userNodePeer;
+	}
+
+	public String getClassName() {
+		return className;
+	}
+
+	public void setClassName(String className) {
+		this.className = className;
 	}
 	
 }

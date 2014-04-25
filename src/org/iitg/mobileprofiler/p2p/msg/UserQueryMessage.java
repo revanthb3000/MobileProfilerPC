@@ -19,16 +19,19 @@ public class UserQueryMessage extends BasicMessage {
 	
 	private String textMessage;
 	
+	private String className;
+	
 	private int askerQuestionId;
 	
 	private ArrayList<Integer> classDistribution;
 	
-	public UserQueryMessage(PeerDescriptor peerDesc, String message, ArrayList<Integer> userClassContents, int questionId, String address) {
+	public UserQueryMessage(PeerDescriptor peerDesc, String message,String classType, ArrayList<Integer> userClassContents, int questionId, String address) {
 		super(MSG_USER_QUERY, new Payload(peerDesc));
 		this.textMessage = message;
 		this.classDistribution = userClassContents;
 		this.askerQuestionId = questionId;
 		this.fromAddress = address;
+		this.className = classType;
 	}
 
 	public String getFromAddress() {
@@ -37,6 +40,10 @@ public class UserQueryMessage extends BasicMessage {
 
 	public String getTextMessage() {
 		return textMessage;
+	}
+
+	public String getClassName() {
+		return className;
 	}
 
 	public ArrayList<Integer> getClassDistribution() {

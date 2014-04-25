@@ -18,7 +18,7 @@ public class TestClass {
 	
 	private static Scanner in = null;
 	
-	private static String ipAddress = "172.16.27.15";
+	private static String ipAddress = "192.168.1.2";
 	
 	private static int boostrapPort = 5080;
 	
@@ -62,12 +62,12 @@ public class TestClass {
 				System.out.print("What is your message ? ");
 				String message = scanner.nextLine();
 				
-				peer.sendQuestionToPeers(message);
+				peer.sendQuestionToPeers(message, "Random Class");
 			}
 			else if(userInput==5){
 				for(PendingQuestion pendingQuestion : peer.getPendingQuestions()){
 					pendingQuestion.setAnswer(6);
-					pendingQuestion.sendReply();
+					pendingQuestion.sendReply(false);
 				}
 			}
 			else if(userInput==6){

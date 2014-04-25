@@ -123,6 +123,7 @@ public class DatabaseConnector {
 			query = "CREATE TABLE IF NOT EXISTS `questionmessages` "
 					+ "(`questionId` int(11) NOT NULL,"
 					+ "`question` varchar(255) NOT NULL,"
+					+ "`className` varchar(255) NOT NULL,"
 					+ " PRIMARY KEY (`questionId`))";
 			statement.executeUpdate(query);
 
@@ -135,7 +136,7 @@ public class DatabaseConnector {
 					+ "`similarity` real NOT NULL,"
 					+ " PRIMARY KEY (`answerId`))";
 			statement.executeUpdate(query);
-			
+
 			// THIS WON'T SUFFICE. OPEN THE SQLITE FILE AND SET responseId to
 			// INTEGER PRIMARY KEY. This is for the AUTO_INCREMENT thing.
 			query = "CREATE TABLE IF NOT EXISTS `responses` (`responseId` int(11) NOT NULL,"
@@ -975,9 +976,9 @@ public class DatabaseConnector {
 	 * 
 	 * @param question
 	 */
-	public void addQuestion(String question) {
-		String query = "INSERT INTO `questionmessages`(`question`) VALUES(\""
-				+ question + "\");";
+	public void addQuestion(String question, String className) {
+		String query = "INSERT INTO `questionmessages`(`question`,`className`) VALUES(\""
+				+ question + "\",\"" + className + "\");";
 		try {
 			Statement statement = connection.createStatement();
 			statement.executeUpdate(query);
@@ -1008,12 +1009,13 @@ public class DatabaseConnector {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Get the questionId of the last asked question.
+	 * 
 	 * @return
 	 */
-	public int getMaxQuestionId(){
+	public int getMaxQuestionId() {
 		String query = "SELECT MAX(questionId) from questionmessages;";
 		int questionId = 0;
 		try {
@@ -1033,7 +1035,8 @@ public class DatabaseConnector {
 
 	/**
 	 * Given a questionId, I'll return the weighted answer
-	 * @return 
+	 * 
+	 * @return
 	 */
 	public Double getWeightedAnswer(int questionId) {
 		String query = "Select * from `answermessages` WHERE questionId = "
@@ -1047,14 +1050,13 @@ public class DatabaseConnector {
 			while (resultSet.next()) {
 				int answer = resultSet.getInt("answer");
 				Double similarity = resultSet.getDouble("similarity");
-				weightedAnswer += (answer*similarity);
+				weightedAnswer += (answer * similarity);
 				totalSimilarity += similarity;
 			}
-			if(totalSimilarity==0.0){
+			if (totalSimilarity == 0.0) {
 				weightedAnswer = 0.0;
-			}
-			else{
-				weightedAnswer = weightedAnswer/totalSimilarity;	
+			} else {
+				weightedAnswer = weightedAnswer / totalSimilarity;
 			}
 		} catch (SQLException e) {
 			System.out.println("Exception Caught for query " + query + " \n"
@@ -1063,14 +1065,16 @@ public class DatabaseConnector {
 		}
 		return weightedAnswer;
 	}
-	
+
 	/**
 	 * Given a questionId, this will return the question. Null, if not.
+	 * 
 	 * @param questionId
 	 * @return
 	 */
-	public String getQuestion(int questionId){
-		String query = "Select question from `questionmessages` WHERE questionId = " + questionId + ";";
+	public String getQuestion(int questionId) {
+		String query = "Select question from `questionmessages` WHERE questionId = "
+				+ questionId + ";";
 		String question = null;
 		try {
 			Statement statement = connection.createStatement();
@@ -1080,27 +1084,35 @@ public class DatabaseConnector {
 				question = resultSet.getString("question");
 			}
 		} catch (SQLException e) {
-			System.out.println("Exception Caught for query " + query + " \n" + e);
+			System.out.println("Exception Caught for query " + query + " \n"
+					+ e);
 			e.printStackTrace();
 		}
 		return question;
 	}
 
-
 	/*************************************************************************
 	 * Queries that run on the response table follow.
 	 **************************************************************************/
-	
+
 	/**
 	 * Given response data, this query inserts it into the table.
+	 * 
 	 * @param userId
 	 * @param question
 	 * @param answer
 	 * @param className
 	 */
-	public void insertResponse(String userId, String question, int answer, String className){
+	public void insertResponse(String userId, String question, int answer,
+			String className) {
 		String query = "INSERT INTO `responses` (`userId` ,`question` ,`answer` ,`className`)"
-				+ "VALUES ('"+userId+"', '"+question+"', '"+answer+"', '"+className+"');";
+				+ "VALUES ('"
+				+ userId
+				+ "', '"
+				+ question
+				+ "', '"
+				+ answer
+				+ "', '" + className + "');";
 		try {
 			Statement statement = connection.createStatement();
 			statement.executeUpdate(query);
@@ -1110,12 +1122,14 @@ public class DatabaseConnector {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
-	 * Given an arraylist of response daos, this function will insert them into the DB.
+	 * Given an arraylist of response daos, this function will insert them into
+	 * the DB.
+	 * 
 	 * @param responseDaos
 	 */
-	public void insertResponses(ArrayList<ResponseDao> responseDaos){
+	public void insertResponses(ArrayList<ResponseDao> responseDaos) {
 		String query = "";
 		try {
 			Statement statement = connection.createStatement();
@@ -1132,9 +1146,8 @@ public class DatabaseConnector {
 							+ responseDaos.get(i).getClassName()
 							+ "' AS `className`";
 				} else {
-					query += "UNION SELECT '"
-							+ responseDaos.get(i).getUserId() + "','"
-							+ responseDaos.get(i).getQuestion() + "','"
+					query += "UNION SELECT '" + responseDaos.get(i).getUserId()
+							+ "','" + responseDaos.get(i).getQuestion() + "','"
 							+ responseDaos.get(i).getAnswer() + "','"
 							+ responseDaos.get(i).getClassName() + "'  ";
 				}
@@ -1146,12 +1159,13 @@ public class DatabaseConnector {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Gets the max responseId present in the table.
+	 * 
 	 * @return
 	 */
-	public int getMaxResponseId(){
+	public int getMaxResponseId() {
 		String query = "SELECT MAX(responseId) from responses;";
 		int responseId = 0;
 		try {
@@ -1168,16 +1182,19 @@ public class DatabaseConnector {
 		}
 		return responseId;
 	}
-	
+
 	/**
-	 * Given a startingId and an endingId, this query will return an ArrayList of Responses.
+	 * Given a startingId and an endingId, this query will return an ArrayList
+	 * of Responses.
+	 * 
 	 * @param startingId
 	 * @param endingId
 	 * @return
 	 */
-	public ArrayList<ResponseDao> getResponses(int startingId, int endingId){
+	public ArrayList<ResponseDao> getResponses(int startingId, int endingId) {
 		ArrayList<ResponseDao> responseDaos = new ArrayList<ResponseDao>();
-		String query = "Select * from `responses` where responseId>="+startingId+" AND responseId<="+endingId+"";
+		String query = "Select * from `responses` where responseId>="
+				+ startingId + " AND responseId<=" + endingId + "";
 		try {
 			Statement statement = connection.createStatement();
 			ResultSet resultSet;
@@ -1187,7 +1204,8 @@ public class DatabaseConnector {
 				String question = resultSet.getString("question");
 				int answer = resultSet.getInt("answer");
 				String className = resultSet.getString("className");
-				responseDaos.add(new ResponseDao(userId, question, answer, className));
+				responseDaos.add(new ResponseDao(userId, question, answer,
+						className));
 			}
 		} catch (SQLException e) {
 			System.out.println("Exception Caught for query " + query + " \n"
@@ -1196,15 +1214,16 @@ public class DatabaseConnector {
 		}
 		return responseDaos;
 	}
-	
-	
+
 	/**
 	 * Given a question, this function returns all responses.
+	 * 
 	 * @param question
-	 * @return 
+	 * @return
 	 */
-	public ArrayList<ResponseDao> getAnswersOfQuestion(String question){
-		String query = "Select * from `responses` Where question='"+question+"';";
+	public ArrayList<ResponseDao> getAnswersOfQuestion(String question) {
+		String query = "Select * from `responses` Where question='" + question
+				+ "';";
 		ArrayList<ResponseDao> responseDaos = new ArrayList<ResponseDao>();
 		try {
 			Statement statement = connection.createStatement();
@@ -1214,7 +1233,8 @@ public class DatabaseConnector {
 				String userId = resultSet.getString("userId");
 				int answer = resultSet.getInt("answer");
 				String className = resultSet.getString("className");
-				responseDaos.add(new ResponseDao(userId, question, answer, className));
+				responseDaos.add(new ResponseDao(userId, question, answer,
+						className));
 			}
 		} catch (SQLException e) {
 			System.out.println("Exception Caught for query " + query + " \n"
@@ -1223,12 +1243,13 @@ public class DatabaseConnector {
 		}
 		return responseDaos;
 	}
-	
+
 	/**
 	 * Returns a list of unique questions in repo.
+	 * 
 	 * @return
 	 */
-	public ArrayList<String> getQuestionsList(){
+	public ArrayList<String> getQuestionsList() {
 		String query = "Select distinct(question) from `responses`;";
 		ArrayList<String> questions = new ArrayList<String>();
 		try {
@@ -1246,5 +1267,5 @@ public class DatabaseConnector {
 		}
 		return questions;
 	}
-	
+
 }

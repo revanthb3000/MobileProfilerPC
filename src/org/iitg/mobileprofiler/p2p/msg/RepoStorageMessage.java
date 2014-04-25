@@ -20,12 +20,15 @@ public class RepoStorageMessage extends BasicMessage {
 	private String userId;
 	
 	private Integer answer;
+	
+	private String className;
 
-	public RepoStorageMessage(PeerDescriptor peerDesc, String question, String userId, Integer answer) {
+	public RepoStorageMessage(PeerDescriptor peerDesc, String question, String className, String userId, Integer answer) {
 		super(MSG_REPO_STORAGE, new Payload(peerDesc));
 		this.question = question;
 		this.userId = userId;
 		this.answer = answer;
+		this.className = className;
 	}
 
 	public String getQuestion() {
@@ -38,6 +41,10 @@ public class RepoStorageMessage extends BasicMessage {
 
 	public Integer getAnswer() {
 		return answer;
+	}
+
+	public String getClassName() {
+		return className;
 	}
 	
 }
