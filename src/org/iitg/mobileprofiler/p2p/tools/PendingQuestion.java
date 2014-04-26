@@ -26,6 +26,7 @@ public class PendingQuestion {
 		this.destinationIpAddress = destinationIpAddress;
 		this.userNodePeer = userNodePeer;
 		this.className = className;
+		this.answer = 0;
 	}
 	
 	public void sendReply(Boolean isPublic){
