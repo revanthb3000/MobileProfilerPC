@@ -161,7 +161,6 @@ public class UserNodePeer extends Peer {
 			}
 			if (peerMsg.get("type").equals(
 					ResponseDataMessage.MSG_RESPONSE_DATA)) {
-				System.out.println("Repo Updated");
 				Gson gson = new Gson();
 				ResponseDataMessage responseDataMessage = gson.fromJson(
 						peerMsg.toString(), ResponseDataMessage.class);
@@ -169,6 +168,8 @@ public class UserNodePeer extends Peer {
 				databaseConnector.insertResponses(responseDataMessage
 						.getResponses());
 				databaseConnector.closeDBConnection();
+				System.out.println("Repo Updated with " + responseDataMessage.getResponses().size() + " responses.");
+
 			}
 		} catch (JSONException e) {
 			throw new RuntimeException(e);

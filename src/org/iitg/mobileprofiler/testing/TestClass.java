@@ -19,6 +19,6 @@ public class TestClass {
 //		UtilityFunctions.classifyExperimentalOutput("input.txt");
 //		UtilityFunctions.writeClassContentsToFile("classContents.txt", true);
 //		System.out.println("Done !!!");
-		UtilityFunctions.writeClassMappingToFile();
+		UtilityFunctions.insertExperimentalResponses();
 	}
 }
