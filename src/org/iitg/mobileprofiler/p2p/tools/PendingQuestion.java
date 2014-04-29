@@ -6,7 +6,7 @@ public class PendingQuestion {
 
 	private String question;
 	
-	private String className;
+	private int classId;
 
 	private Double similarity;
 	
@@ -19,18 +19,18 @@ public class PendingQuestion {
 	private UserNodePeer userNodePeer;
 	
 
-	public PendingQuestion(String question, String className, Double similarity, int questionId, String destinationIpAddress, UserNodePeer userNodePeer) {
+	public PendingQuestion(String question, int classId, Double similarity, int questionId, String destinationIpAddress, UserNodePeer userNodePeer) {
 		this.question = question;
 		this.similarity = similarity;
 		this.questionId = questionId;
 		this.destinationIpAddress = destinationIpAddress;
 		this.userNodePeer = userNodePeer;
-		this.className = className;
+		this.classId = classId;
 		this.answer = 0;
 	}
 	
 	public void sendReply(Boolean isPublic){
-		userNodePeer.sendReply(question, className, similarity, answer, questionId, destinationIpAddress, isPublic);
+		userNodePeer.sendReply(question, classId, similarity, answer, questionId, destinationIpAddress, isPublic);
 	}
 
 	public String getQuestion() {
@@ -81,12 +81,12 @@ public class PendingQuestion {
 		this.userNodePeer = userNodePeer;
 	}
 
-	public String getClassName() {
-		return className;
+	public int getClassId() {
+		return classId;
 	}
 
-	public void setClassName(String className) {
-		this.className = className;
+	public void setClassId(int classId) {
+		this.classId = classId;
 	}
 	
 }

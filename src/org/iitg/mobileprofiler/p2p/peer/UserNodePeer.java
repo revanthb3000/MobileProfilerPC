@@ -125,7 +125,7 @@ public class UserNodePeer extends Peer {
 				int questionId = Integer.parseInt(peerMsg
 						.get("askerQuestionId").toString());
 				String question = peerMsg.get("textMessage").toString();
-				String className = peerMsg.get("className").toString();
+				int classId = Integer.parseInt(peerMsg.get("classId").toString());
 				String userName = params.get("name").toString();
 				String ipAddress = peerMsg.getString("fromAddress");
 				ArrayList<Integer> questionClassDistribution = UtilityFunctions
@@ -137,7 +137,7 @@ public class UserNodePeer extends Peer {
 				System.out.println("Question from " + userName + ": "
 						+ question);
 
-				pendingQuestions.add(new PendingQuestion(question, className,
+				pendingQuestions.add(new PendingQuestion(question, classId,
 						similarity, questionId, ipAddress, this));
 			}
 			if (peerMsg.get("type").equals(QueryReplyMessage.MSG_QUERY_REPLY)) {
@@ -277,21 +277,19 @@ public class UserNodePeer extends Peer {
 		send(new Address(bootstrapAddress), textMessage);
 	}
 
-	public void sendReply(String question, String className, Double similarity,
-			int answer, int questionId, String destinationIpAddress,
-			Boolean isPublic) {
+	public void sendReply(String question, int classId, Double similarity, int answer, int questionId, String destinationIpAddress, Boolean isPublic) {
 		QueryReplyMessage queryReplyMessage = new QueryReplyMessage(
 				peerDescriptor, question, similarity, answer, questionId);
 		send(new Address(destinationIpAddress), queryReplyMessage);
 		if (isPublic) {
 			RepoStorageMessage repoStorageMessage = new RepoStorageMessage(
-					peerDescriptor, question, className,
+					peerDescriptor, question, classId,
 					peerDescriptor.getName(), answer);
 			send(new Address(bootstrapAddress), repoStorageMessage);
 		}
 		DatabaseConnector databaseConnector = new DatabaseConnector();
 		databaseConnector.insertResponse(peerDescriptor.getName(), question,
-				answer, className);
+				answer, classId);
 		databaseConnector.closeDBConnection();
 	}
 

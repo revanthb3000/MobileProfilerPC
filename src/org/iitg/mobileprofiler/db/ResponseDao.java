@@ -8,15 +8,15 @@ public class ResponseDao {
 	
 	private int answer;
 	
-	private String className;
+	private int classId;
 	
 	public ResponseDao(String userId, String question, int answer,
-			String className) {
+			int classId) {
 		super();
 		this.userId = userId;
 		this.question = question;
 		this.answer = answer;
-		this.className = className;
+		this.classId = classId;
 	}
 
 	public String getUserId() {
@@ -43,18 +43,18 @@ public class ResponseDao {
 		this.answer = answer;
 	}
 
-	public String getClassName() {
-		return className;
+	public int getClassId() {
+		return classId;
 	}
 
-	public void setClassName(String className) {
-		this.className = className;
+	public void setClassId(int classId) {
+		this.classId = classId;
 	}
 
 	@Override
 	public String toString() {
 		return "ResponseDao [userId=" + userId + ", question=" + question
-				+ ", answer=" + answer + ", className=" + className + "]";
+				+ ", answer=" + answer + ", classId=" + classId + "]";
 	}
 	
 }
