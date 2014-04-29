@@ -1191,6 +1191,28 @@ public class DatabaseConnector {
 		}
 		return className;
 	}
+	
+	/**
+	 * Gets the number of various response Classes present.
+	 * @return
+	 */
+	public int getNumberOfResponseClasses(){
+		String query = "SELECT Count(className) from responseclasses;";
+		int numberOfClasses = 0;
+		try {
+			Statement statement = connection.createStatement();
+			ResultSet resultSet;
+			resultSet = statement.executeQuery(query);
+			if (resultSet.next()) {
+				numberOfClasses = resultSet.getInt("Count(className)");
+			}
+		} catch (SQLException e) {
+			System.out.println("Exception Caught for query " + query + " \n"
+					+ e);
+			e.printStackTrace();
+		}
+		return numberOfClasses;
+	}
 
 	/*************************************************************************
 	 * Queries that run on the response table follow.
