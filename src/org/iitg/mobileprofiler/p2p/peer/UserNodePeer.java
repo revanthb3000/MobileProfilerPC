@@ -122,6 +122,7 @@ public class UserNodePeer extends Peer {
 				}
 			}
 			if (peerMsg.get("type").equals(UserQueryMessage.MSG_USER_QUERY)) {
+				System.out.println(peerMsg);
 				int questionId = Integer.parseInt(peerMsg
 						.get("askerQuestionId").toString());
 				String question = peerMsg.get("textMessage").toString();
@@ -270,10 +271,12 @@ public class UserNodePeer extends Peer {
 		DatabaseConnector databaseConnector = new DatabaseConnector();
 		int questionId = databaseConnector.getMaxQuestionId() + 1;
 		databaseConnector.addQuestion(message, className);
+		int classId = databaseConnector.getResponseClassId(className);
 		databaseConnector.closeDBConnection();
+		
 
 		UserQueryMessage textMessage = new UserQueryMessage(peerDescriptor,
-				message, className, classContents, questionId, getAddress()
+				message, classId, classContents, questionId, getAddress()
 						.getHost() + ":" + getAddress().getPort());
 		send(new Address(bootstrapAddress), textMessage);
 	}

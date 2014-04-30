@@ -58,8 +58,9 @@ public class ResponseRecommendations {
 	
 	/**
 	 * General function that when given similarities would calculate the recommended scores.
+	 * @return 
 	 */
-	public void getRecommendations(Map<String, Double> similarities){
+	public Map<String, Double> getRecommendations(Map<String, Double> similarities){
 		Map<String, Double> recommendedScore = new HashMap<String, Double>();
 		Map<String, Double> questionResponseCount = new HashMap<String, Double>();
 		for(String question : questions){
@@ -81,13 +82,15 @@ public class ResponseRecommendations {
 			System.out.println(question.trim() + " - " + recommendation);
 			recommendedScore.put(question, recommendation);
 		}
+		return recommendedScore;
 	}
 	
 	/**
 	 * Basic recommendation scheme.
 	 * Just take the average.
+	 * @return 
 	 */
-	public void getAverageRecommendation(){
+	public Map<String, Double> getAverageRecommendation(){
 		Map<String, Double> similarities = new HashMap<String, Double>();
 		ArrayList<Double> userVector = new ArrayList<Double>();
 		for(int i=0;i<numberOfClasses;i++){
@@ -96,33 +99,35 @@ public class ResponseRecommendations {
 		for(String user : peerUserIds){
 			similarities.put(user, getSimilarityScore(userVector, userVector));
 		}
-		getRecommendations(similarities);
+		return getRecommendations(similarities);
 	}
 	
 	/**
 	 * Recommendation using participation history.
 	 * Just take the average.
+	 * @return 
 	 */
-	public void getParticipationHistoryRecommendation(){
+	public Map<String, Double> getParticipationHistoryRecommendation(){
 		Map<String, Double> similarities = new HashMap<String, Double>();
 		ArrayList<Double> userVector = getClassAverageUserVector(mobileOwnerId);
 		for(String user : peerUserIds){
 			similarities.put(user, getSimilarityScore(userVector, getClassAverageUserVector(user)));
 		}
-		getRecommendations(similarities);
+		return getRecommendations(similarities);
 	}
 	
 	/**
 	 * Recommendation using Entropy of participation history.
 	 * Just take the average.
+	 * @return 
 	 */
-	public void getEntropyRecommendation(){
+	public Map<String, Double> getEntropyRecommendation(){
 		Map<String, Double> similarities = new HashMap<String, Double>();
 		ArrayList<Double> userVector = getEntropyUserVector(mobileOwnerId);
 		for(String user : peerUserIds){
 			similarities.put(user, getSimilarityScore(userVector, getClassAverageUserVector(user)));
 		}
-		getRecommendations(similarities);
+		return getRecommendations(similarities);
 	}
 	
 	/**
