@@ -3,9 +3,11 @@ package org.iitg.mobileprofiler.p2p.tools;
 import it.unipr.ce.dsg.s2p.org.json.JSONException;
 import it.unipr.ce.dsg.s2p.peer.PeerListManager;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 
+import org.iitg.mobileprofiler.db.DatabaseConnector;
 import org.iitg.mobileprofiler.p2p.peer.UserNodePeer;
 
 /**
@@ -34,11 +36,32 @@ public class TestClass {
 		String peerName = in.nextLine().trim();
 		int portNumber = Integer.parseInt(peerName.split(":")[1]);
 		peerName = peerName.split(":")[0];
+
+		ArrayList<Integer> userClassContents = null;
+		int numberOfClasses = 0;
 		
-		String currentTime = "" + (new Date()).getTime();
-		UserNodePeer peer = new UserNodePeer(UtilityFunctions.getHexDigest(currentTime), 
-											 peerName, portNumber, 
-											 UtilityFunctions.getRandomClassDistribution(), 
+		DatabaseConnector databaseConnector = new DatabaseConnector();
+		numberOfClasses = databaseConnector.getNumberOfClasses();
+		userClassContents = databaseConnector.getNumberOfDocuments(0, numberOfClasses, true);
+		databaseConnector.closeDBConnection();
+		
+		if(peerName.contains("all")){
+			userClassContents = new ArrayList<Integer>();
+			for(int i=0;i<numberOfClasses;i++){
+				if(i%3==0){
+					userClassContents.add(8);
+				}
+				else{
+					userClassContents.add(0);
+				}
+			}	
+		}
+		
+		System.out.println(userClassContents);
+
+		UserNodePeer peer = new UserNodePeer(UtilityFunctions.getHexDigest(peerName), 
+											 peerName, portNumber,  
+											 /*UtilityFunctions.getRandomClassDistribution()*/userClassContents,
 											 ipAddress + ":" + boostrapPort, 
 											 ipAddress + ":" + SBCPort ,0);
 		
@@ -66,8 +89,14 @@ public class TestClass {
 			}
 			else if(userInput==5){
 				for(PendingQuestion pendingQuestion : peer.getPendingQuestions()){
-					pendingQuestion.setAnswer(6);
-					pendingQuestion.sendReply(false);
+
+					System.out.println("What would you like to send for " + pendingQuestion.getQuestion() + " ?");
+					Integer rating = in.nextInt();
+					System.out.println("Public or private ?");
+					
+					Integer privacy = in.nextInt();
+					pendingQuestion.setAnswer(rating);
+					pendingQuestion.sendReply((privacy==1)?true:false);
 				}
 			}
 			else if(userInput==6){
