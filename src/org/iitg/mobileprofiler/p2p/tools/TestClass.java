@@ -4,7 +4,6 @@ import it.unipr.ce.dsg.s2p.org.json.JSONException;
 import it.unipr.ce.dsg.s2p.peer.PeerListManager;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Scanner;
 
 import org.iitg.mobileprofiler.db.DatabaseConnector;
@@ -20,7 +19,7 @@ public class TestClass {
 	
 	private static Scanner in = null;
 	
-	private static String ipAddress = "192.168.1.2";
+	private static String ipAddress = "172.20.10.4";
 	
 	private static int boostrapPort = 5080;
 	
