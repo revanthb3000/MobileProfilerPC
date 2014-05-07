@@ -19,7 +19,7 @@ public class TestClass {
 	
 	private static Scanner in = null;
 	
-	private static String ipAddress = "172.20.10.4";
+	private static String ipAddress = "127.0.0.1";
 	
 	private static int boostrapPort = 5080;
 	
